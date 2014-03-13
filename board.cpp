@@ -2,10 +2,10 @@
 #include "pieces.h"
 #include "board.h"
 
-
+#define SIZE_PIECE 60
 using namespace std;
 
-Board::Board(){
+Board::Board(int board_x, int board_y){
     Piece pawns(PAWN);
     Piece towers(TOWER);
     Piece bishops(BISHOP);
@@ -17,11 +17,12 @@ Board::Board(){
         for(int j = 0; j < 8; j++){
             pieces[i][j] = blanks;
             pieces[i][j].color = -1;
-            pieces[i][j].image.setPosition(220+60*(j), 400 - 60*(i-2)); //The board stars at (220, 100), and each piece is a 60x60 square
-            pieces[i][j].square.setPosition(220+60*(j), 400 - 60*(i-2));
+            pieces[i][j].image.setPosition(board_x + SIZE_PIECE*(j), (board_y + SIZE_PIECE*5) - SIZE_PIECE*(i-2)); //The board stars at (220, 100), and each piece is a 60x60 square
+            pieces[i][j].square.setPosition(board_x + SIZE_PIECE*(j), (board_y + SIZE_PIECE*5) - SIZE_PIECE*(i-2)); //initial point + (wanted square)*(size of square)
             sf::FloatRect squareRect(pieces[i][j].square.getPosition().x, pieces[i][j].square.getPosition().y,
                                  pieces[i][j].square.getSize().x, pieces[i][j].square.getSize().y);
             pieces[i][j].rectSquare = squareRect; //Creates the FloatRect in the same position
+            pieces[i][j].border.setPosition(board_x + SIZE_PIECE*(j), (board_y + SIZE_PIECE*5) - SIZE_PIECE*(i-2));
         }
     }
         //Towers
@@ -83,27 +84,32 @@ Board::Board(){
     }
     for(int x = 0; x < 8; x++){ //Set the position of the pawns
 
-        pieces[1][x].image.setPosition(220+60*(x), 460);
-        pieces[1][x].square.setPosition(220+60*(x), 460);
+        pieces[1][x].image.setPosition(board_x + SIZE_PIECE*(x), board_y + 6*SIZE_PIECE); //460
+        pieces[1][x].square.setPosition(board_x + SIZE_PIECE*(x), board_y + 6*SIZE_PIECE);
+        pieces[1][x].border.setPosition(board_x + SIZE_PIECE*(x), board_y + 6*SIZE_PIECE);
         sf::FloatRect squareRect(pieces[1][x].square.getPosition().x, pieces[1][x].square.getPosition().y,
                                  pieces[1][x].square.getSize().x, pieces[1][x].square.getSize().y);
         pieces[1][x].rectSquare = squareRect;
 
-        pieces[6][x].image.setPosition(220+60*(x), 160);
-        pieces[6][x].square.setPosition(220+60*(x), 160);
+
+        pieces[6][x].image.setPosition(board_x + SIZE_PIECE*(x), board_y + SIZE_PIECE);
+        pieces[6][x].square.setPosition(board_x + SIZE_PIECE*(x), board_y + SIZE_PIECE);
+        pieces[6][x].border.setPosition(board_x + SIZE_PIECE*(x), board_y + SIZE_PIECE);
         sf::FloatRect squareRect2(pieces[6][x].square.getPosition().x, pieces[6][x].square.getPosition().y,
                                   pieces[6][x].square.getSize().x, pieces[6][x].square.getSize().y);
         pieces[6][x].rectSquare = squareRect2;
     }
     for(int i = 0; i < 8; i++){ //Set the position of the other pieces
-        pieces[0][i].image.setPosition(220+60*(i), 520);
-        pieces[0][i].square.setPosition(220+60*(i), 520);
+        pieces[0][i].image.setPosition(board_x + SIZE_PIECE*(i), board_y + 7*SIZE_PIECE); //520
+        pieces[0][i].square.setPosition(board_x + SIZE_PIECE*(i), board_y + 7*SIZE_PIECE);
+        pieces[0][i].border.setPosition(board_x + SIZE_PIECE*(i), board_y + 7*SIZE_PIECE);
         sf::FloatRect squareRect0(pieces[0][i].square.getPosition().x, pieces[0][i].square.getPosition().y,
                                  pieces[0][i].square.getSize().x, pieces[0][i].square.getSize().y);
         pieces[0][i].rectSquare = squareRect0;
 
-        pieces[7][i].image.setPosition(220+60*(i), 100);
-        pieces[7][i].square.setPosition(220+60*(i), 100);
+        pieces[7][i].image.setPosition(board_x + SIZE_PIECE*(i), board_y);
+        pieces[7][i].square.setPosition(board_x + SIZE_PIECE*(i), board_y);
+        pieces[7][i].border.setPosition(board_x + SIZE_PIECE*(i), board_y);
         sf::FloatRect squareRect1(pieces[7][i].square.getPosition().x, pieces[7][i].square.getPosition().y,
                                  pieces[7][i].square.getSize().x, pieces[7][i].square.getSize().y);
         pieces[7][i].rectSquare = squareRect1;

@@ -50,9 +50,13 @@
 			<Add library="libsfml-network" />
 			<Add directory="../SFML-2.1/lib" />
 		</Linker>
+		<Unit filename="GUI.cpp" />
+		<Unit filename="GUI.h" />
 		<Unit filename="Pieces.h" />
 		<Unit filename="board.cpp" />
 		<Unit filename="board.h" />
+		<Unit filename="checkbox.cpp" />
+		<Unit filename="checkbox.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="piece.cpp" />
 		<Extensions>

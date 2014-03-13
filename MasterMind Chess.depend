@@ -1,8 +1,9 @@
 # depslib dependency file v1.0
-1393973572 source:c:\users\gabriel\desktop\ciência da computação\bci\main.cpp
+1394596686 source:c:\users\gabriel\desktop\ciência da computação\bci\main.cpp
 	<SFML/Graphics.hpp>
 	<iostream>
 	"board.h"
+	"checkbox.h"
 
 1367997278 c:\users\gabriel\desktop\ciência da computação\sfml-2.1\include\sfml\graphics.hpp
 	<SFML/Window.hpp>
@@ -338,12 +339,12 @@
 	<string>
 	<vector>
 
-1393964163 source:c:\users\gabriel\desktop\ciência da computação\bci\board.cpp
+1394596533 source:c:\users\gabriel\desktop\ciência da computação\bci\board.cpp
 	<SFML/Graphics.hpp>
 	"pieces.h"
 	"board.h"
 
-1393871196 c:\users\gabriel\desktop\ciência da computação\bci\board.h
+1394518783 c:\users\gabriel\desktop\ciência da computação\bci\board.h
 	"Pieces.h"
 
 1393598968 c:\users\gabriel\desktop\ciência da computação\bci\board.cpp
@@ -351,7 +352,7 @@
 	"pieces.h"
 	"board.h"
 
-1394056579 c:\users\gabriel\desktop\ciência da computação\bci\pieces.h
+1394594750 c:\users\gabriel\desktop\ciência da computação\bci\pieces.h
 
 1393503975 c:\users\gabriel\desktop\ciência da computação\bci\piece.cpp
 	<SFML/Graphics.hpp>
@@ -362,12 +363,28 @@
 1393503363 c:\users\gabriel\desktop\ciência da computação\bci\squares.cpp
 	<SFML/Graphics.hpp>
 
-1394056579 source:c:\users\gabriel\desktop\ciência da computação\bci\piece.cpp
+1394595684 source:c:\users\gabriel\desktop\ciência da computação\bci\piece.cpp
 	<SFML/Graphics.hpp>
 	"Pieces.h"
 	<iostream>
+	<math.h>
 
 1393503815 source:c:\users\gabriel\desktop\ciência da computação\bci\squares.cpp
 	<SFML/Graphics.hpp>
 	"squares.h"
+
+1394567682 source:c:\users\gabriel\desktop\ciência da computação\bci\gui.cpp
+	"GUI.h"
+
+1394592772 c:\users\gabriel\desktop\ciência da computação\bci\gui.h
+	<SFML/Graphics.hpp>
+
+1394595655 source:c:\users\gabriel\desktop\ciência da computação\bci\checkbox.cpp
+	"checkbox.h"
+	<string>
+	<iostream>
+
+1394579086 c:\users\gabriel\desktop\ciência da computação\bci\checkbox.h
+	"GUI.h"
+	<string>
 
