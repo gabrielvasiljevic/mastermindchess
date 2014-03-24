@@ -9,8 +9,8 @@ class Piece{
     TYPE type;
     sf::Sprite image; //The image of the piece itself
     sf::Sprite border;
-    void movement(Piece board[8][8], int i, int j, int iP, int jP);
-    void capture(Piece board[8][8], int i, int j, int iP, int jP);
+    bool movement(Piece board[8][8], int i, int j, int iP, int jP);
+    bool capture(Piece board[8][8], int i, int j, int iP, int jP);
     int color; //The color of the piece: black or white
     char code;
     bool clicked; //To check if the piece was clicked

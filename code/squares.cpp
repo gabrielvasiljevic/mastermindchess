@@ -1,6 +1,6 @@
 #include <SFML/Graphics.hpp>
 #define SIZE 60
-#include "squares.h"
+#include "headers/squares.h"
 
 
 Square::Square(){

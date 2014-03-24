@@ -1,4 +1,4 @@
-#include "GUI.h"
+#include "headers/GUI.h"
 
 
 Interface_Element::Interface_Element(int x, int y, int size_x, int size_y){
