@@ -9,32 +9,34 @@
 #include "headers/checkbox.h"
 #include "headers/game.h"
 #include "headers/networkHandler.h"
+#include "headers/login.h"
+#include "headers/lobby.h"
+#include "headers/dataTypes.h"
 
-#define BOARD_X 220 //position of the board
-#define BOARD_Y 100
 
 using namespace std;
 using namespace sf;
 
-enum class STATE {Login, Lobby, Game, Waiting};
 
+//220, 100
 
-STATE state = STATE::Game;
+STATE state = STATE::Login;
 
-
+string VERSION = "0.1.4";
 
 Packet packet;
+
 TcpSocket server;
 //int port = 14193;
 //string ip = "127.0.0.1";
-int port;
 string ip;
 int enemyID = -1;
 int i;
 int j;
-int iP;
-int jP;
-int myColor = 1;
+int optColor = 1;
+bool check;
+sf::Text temporary;
+sf::Font tempfont;
 string username, password;
 
 
@@ -47,111 +49,88 @@ void Initialize_Texture(Piece b[8][8]);
 
 
 int main(){
-    ifstream config {"config.dat"};
-    if (config.is_open()){
-        getline(config, ip, ';');
-        config >> port;
-    }
-
-    NetworkHandler network;
-    network.connect(port);
-    bool response = false, Color = false;
-    string answer;
-    packetID receive;
-    cout << "Input your username: " << endl;
-    getline(cin, username);
-    cout << "Input your password: " << endl;
-    getline(cin, password);
-    network.sendLogin(username, password);
-    cout << "Please wait..." << endl;
-    do{
-        receive = network.receive();
-    }while(receive == packetID::None);
-
-    switch(receive){
-        case packetID::LoginResponse:
-            if(network.receiveLoginResponse()){
-                cout << "Login successful!" << endl;
-            }
-            else cout << "Incorrect login..." << endl;
-        break;
-    }
-
-    cout << "Waiting for another player..." << endl;
-    network.sendGameRequest();
-    do{
-        receive = network.receive();
-        if(receive == packetID::Options) cout << "options!!" << endl;
-        switch(receive){
-            case packetID::GameRequest:
-                network.sendConnect();
-            break;
-            case packetID::Options:
-                myColor = 0;
-                Color = true;
-                cout << "Changed color!" << endl;
-            break;
-            case packetID::Connect:
-                response = true;
-            break;
-        }
-    }while(!response && !Color);
-
-    //window creation and icon setup
     sf::RenderWindow window(sf::VideoMode(933, 700), "MasterMind Chess", sf::Style::Close);
     sf::Image icon;
     icon.loadFromFile("media/images/Icon.png");
     window.setIcon(256, 256, icon.getPixelsPtr());
-    Game game(window);
-    /*Main loop*/
-    if(state == STATE::Game){
-        game.Run();
-    }
-    game.myColor = myColor;
-    while (window.isOpen()){
-        sf::Event event;
-        network.handleEvents();
-        switch(network.receive()){
-            case packetID::Move:
-                network.receiveMove(&i, &j, &iP, &jP);
-                game.b.pieces[i][j].type = game.b.pieces[iP][jP].type;
-                game.b.pieces[iP][jP].type = BLANK;
-                game.b.pieces[i][j].color = game.b.pieces[iP][jP].color;
-                game.b.pieces[iP][jP].color = -1;
-                //game.b.pieces[i][j].movement(game.b.pieces, i, j, iP, jP);
-                game.Initialize_Texture(game.b.pieces);
-                game.turn = !game.turn;
-            break;
-            case packetID::GameEnd:
-                network.sendDisconnect();
-                window.close();
-            break;
+    NetworkHandler network;
 
+    tempfont.loadFromFile("media/fonts/AGENCYB.TTF");
+    temporary.setFont(tempfont);
+    temporary.setPosition(420, 360);
+    temporary.setString("Waiting for another player...");
+    temporary.setCharacterSize(20U);
+    Login login(window, network);
+    Lobby lobby(window, network);
+    Game game(window, network, 1);
+    while (window.isOpen()){
+        switch(network.receive()){
+            case packetID::Options:
+                optColor = 0;
+                state = STATE::Game;
+                game.myColor = 0;
+                game.b.InitializeBlack(BOARD_X, BOARD_Y);
+            break;
         }
-        /*Handle the events*/
+        sf::Event event;
+        if(state == STATE::Login){
+            login.run(state);
+        }
+
+        if(state == STATE::Lobby){
+            lobby.run(state);
+        }
+
+        /*if(state == STATE::Game){
+            game.Run(state);
+        }
         while (window.pollEvent(event)){
             switch(event.type){
                 case sf::Event::Closed:
-                    network.sendDisconnect();
+                    //network.sendDisconnect();
                     window.close();
                 case sf::Event::MouseButtonPressed: //When the mouse button is clicked, check where it was
-                    if(game.HandleInput(event.mouseButton.x, event.mouseButton.y)){
-                        network.sendMove(game.i, game.j, game.iPiece, game.jPiece);
+                    if(state == STATE::Game){
                     }
+
                     break;
                 } //switch end
 
         }//event while ends
-        /*Draw everything*/
+
+        /*Draw everything
 
         window.clear(sf::Color(0, 150, 255));
+        //window.clear(sf::Color(0, 0, 0));
+        window.draw(temporary);
+        window.display();
 
-        if(state == STATE::Game){
+    }
+  /*
+
+
+    //Main loop
+
+    //game.myColor = myColor;
+    while (window.isOpen()){
+
+        network.handleEvents();
+
+
+
+        }
+        //Handle the events
+
+
+
+       /* if(game.moveCount%2 == 0){
+            network.sendMoveHistory(game.history.currentMove);
+        }
+        if(state == STATE::Game || state == STATE::GameOver){
             game.draw();
         }
-        window.display();
+        else */
     }
-
     return 0;
 }
 

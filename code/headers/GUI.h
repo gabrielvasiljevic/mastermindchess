@@ -2,6 +2,8 @@
 #ifndef _GUI
 #define _GUI
 
+#include "dataTypes.h"
+
 class Interface_Element{
     public:
     int pos_x;

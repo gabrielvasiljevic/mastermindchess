@@ -3,11 +3,9 @@
 
 using namespace std;
 
-bool NetworkHandler::connect (int port) {
+bool NetworkHandler::connect (string ip, int port) {
     server.setBlocking (true);
     server.disconnect();
-
-    string ip = "127.0.0.1";
 
     if (server.connect(ip, port, seconds(2)) == sf::Socket::Done) {
         cout << "Connected to server\n";
@@ -92,28 +90,36 @@ void NetworkHandler::sendName (string myName) {
     buildHeader (packetID::Name);
     packet << myName;
     server.send(packet);
-    cout << "[" << myID << "] Name sended\n";
+   // cout << "[" << myID << "] Name sended\n";
 }
 
 void NetworkHandler::sendChat(std::string msg){
     buildHeader (packetID::Chat);
     packet << msg;
     server.send(packet);
-    cout << "[" << myID << "] Chat message sended\n";
+    //cout << "[" << myID << "] Chat message sended\n";
 }
 
-void NetworkHandler::sendMove(int i, int j, int iP, int jP){
+void NetworkHandler::sendMove(int i, int j, int iP, int jP, bool check){
     buildHeader (packetID::Move);
-    packet << i << j << iP << jP;
+    packet << i << j << iP << jP << check;
     server.send(packet);
-    cout << "[" << myID << "] movement sended\n";
+   // cout << "[" << myID << "] movement sended\n";
 }
 
-void NetworkHandler::receiveMove(int* i, int* j, int* iP, int* jP){
-    packet >> *i >> *j >> *iP >> *jP;
+void NetworkHandler::sendCheckMate(){
+   buildHeader (packetID::Checkmate);
+   server.send(packet);
+   cout << "Checkmate sended" << endl;
+}
+
+void NetworkHandler::receiveMove(int* i, int* j, int* iP, int* jP, bool* check){
+    packet >> *i >> *j >> *iP >> *jP >> *check;
     cout << "Movement received from" << " [" << enemyID << "]" << endl;
     cout << "Moving piece from [" << *iP << "][" << *jP << "] to [" << *i << "][" << *j << "]." <<endl;
-
+    if(*check == true){
+        cout << "Check!" << endl;
+    }
 }
 
 void NetworkHandler::sendGameEnd(){
@@ -132,7 +138,7 @@ void NetworkHandler::sendNegative(){
     buildHeader(packetID::Response);
     packet << false;
     server.send(packet);
-    cout << "Negative response sended to " << player_id << endl;
+    //cout << "Negative response sended to " << player_id << endl;
 }
 
 void NetworkHandler::sendGameRequest(){
