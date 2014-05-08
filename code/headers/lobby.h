@@ -3,8 +3,10 @@
 #include "inputBox.h"
 #include "button.h"
 #include "game.h"
+#include "capablanca.h"
 #include "networkHandler.h"
 #include "dataTypes.h"
+#include "playerListContainer.h"
 
 class Lobby{
     public:
@@ -15,8 +17,12 @@ class Lobby{
         sf::RenderWindow &mainWindow;
         NetworkHandler &network;
         Game game;
+        Capablanca capagame;
         Button playButton;
-        void handleEvent(const sf::Event& event);
+        Button playCapaButton;
+        Button play960Button;
+        playerListContainer PlayerListContainer;
+        void handleEvent(const sf::Event& event, STATE& state);
         void draw();
         void tryToConnect();
         void waitForGame();

@@ -25,9 +25,19 @@ using namespace std;
 
     bool pieceClick = false;
 
+string toClock(double time){
+    string clock = "";
+    clock = clock + ((time/60 < 10) ? "0" : "") + to_string(static_cast<int>(time/60)) + ":";
+    time = static_cast<int>(time)%60;
+    clock += ((time < 10) ? "0" : "") + to_string(static_cast<int>(time));
+    return clock;
+}
+
 Game::Game(sf::RenderWindow &window, NetworkHandler &mainNetwork) : b(BOARD_X, BOARD_Y, 1),
             Hint(750, 100, 15, 15, "Hint"),
             TurnIndicator(120, 100, 15, 15),
+            chat(BOARD_X, BOARD_Y*(55*8) + 5, BOARD_X, BOARD_Y*55, BOARD_X, BOARD_Y*(55*8), ChatStyle::GameChat),
+            gameover(window, mainNetwork),
             mainWindow(window),
             network(mainNetwork){
     sf::Font font;
@@ -48,6 +58,27 @@ Game::Game(sf::RenderWindow &window, NetworkHandler &mainNetwork) : b(BOARD_X, B
     this->enemyCheck = false;
     this->checkMate = false;
 
+    this->warnings.setFont(font);
+    this->warnings.setCharacterSize(20U);
+    this->warnings.setColor(sf::Color::Red);
+    this->warnings.setPosition(750, 600);
+    this->warnings.setString("Check!");
+
+    this->myClockText.setFont(font);
+    this->myClockText.setCharacterSize(20U);
+    this->myClockText.setColor(sf::Color::White);
+    this->myClockText.setPosition(750, 400);
+
+    this->enemyClockText.setFont(font);
+    this->enemyClockText.setCharacterSize(20U);
+    this->enemyClockText.setColor(sf::Color::White);
+    this->enemyClockText.setPosition(750, 200);
+
+
+
+    this->myTime = 300;
+    this->enemyTime = 300;
+
 }
 
 Game::Game(sf::RenderWindow &window, NetworkHandler &mainNetwork, int color) :
@@ -55,13 +86,15 @@ Game::Game(sf::RenderWindow &window, NetworkHandler &mainNetwork, int color) :
             Hint(750, 100, 15, 15, "Hint"),
             TurnIndicator(120, 100, 15, 15),
             mainWindow(window),
+            gameover(window, mainNetwork), //int x, int y, int size_x, int size_y, int input_x, int input_y, ChatStyle style
+            chat(BOARD_X, BOARD_Y+(55*8) + 40, 55*8, 55*2, BOARD_X, BOARD_Y+(55*8) + 15 + 55*2, ChatStyle::GameChat),
             network(mainNetwork){
-    sf::Font font;
+    font.loadFromFile("media/fonts/AGENCYB.TTF");
     this->boardTexture = new sf::Texture();
     this->backgroundTexture = new sf::Texture();
 
     this->boardTexture->loadFromFile("media/images/board55.png");
-    this->backgroundTexture->loadFromFile("media/images/background.jpg");
+    this->backgroundTexture->loadFromFile("media/images/bg1.jpg");
 
     this->board.setTexture(*this->boardTexture);
     this->background.setTexture(*this->backgroundTexture);
@@ -73,11 +106,26 @@ Game::Game(sf::RenderWindow &window, NetworkHandler &mainNetwork, int color) :
     this->check = false;
     this->enemyCheck = false;
     this->checkMate = false;
-    //font.loadFromFile("media/fonts/AGENCYB.TTF");
-   // this->turnText.setFont(font);
-   // this->turnText.setPosition(120 + 5, 100 - 6);
-   // this->turnText.setString("Turn");
- //   this->turnText.setCharacterSize(20U);
+
+    this->warnings.setFont(font);
+    this->warnings.setCharacterSize(20U);
+    this->warnings.setColor(sf::Color::Red);
+    this->warnings.setPosition(750, 600);
+    this->warnings.setString("Check!");
+
+    this->myClockText.setFont(font);
+    this->myClockText.setCharacterSize(20U);
+    this->myClockText.setColor(sf::Color::White);
+    this->myClockText.setPosition(750, 400);
+
+    this->enemyClockText.setFont(font);
+    this->enemyClockText.setCharacterSize(20U);
+    this->enemyClockText.setColor(sf::Color::White);
+    this->enemyClockText.setPosition(750, 200);
+
+    this->myTime = 300;
+    this->enemyTime = 300;
+
 }
 
 void Game::draw(){
@@ -85,6 +133,10 @@ void Game::draw(){
     mainWindow.draw(board);
     mainWindow.draw(Hint.image);
     mainWindow.draw(TurnIndicator.image);
+    mainWindow.draw(myClockText);
+    mainWindow.draw(enemyClockText);
+    if(check)
+    mainWindow.draw(warnings);
     for(i = 0; i < 8; i++){
         for(j = 0; j < 8; j++){
             mainWindow.draw(b.pieces[i][j].square ); //Draw the background first
@@ -96,14 +148,46 @@ void Game::draw(){
     }
     mainWindow.draw(Hint.text);
    mainWindow.draw(TurnIndicator.text);
+   chat.draw(mainWindow);
 }
 
 int Game::Run(STATE& state){
     /*Pieces' texture initialization*/
     Initialize_Texture(b.pieces);
     int i, j, iP, jP;
+    string msg;
     packetID receive;
+
     while (mainWindow.isOpen() && state == STATE::Game){
+        if(turn == myColor){
+            if(myClock.getElapsedTime().asSeconds() > 1){
+                myTime--;
+                myClock.restart();
+            }
+        }
+        else{
+            if(myClock.getElapsedTime().asSeconds() > 1){
+                enemyTime--;
+                myClock.restart();
+            }
+        }
+        if(enemyTime <= 20) enemyClockText.setColor(sf::Color::Red);
+        if(myTime <= 20) myClockText.setColor(sf::Color::Red);
+
+        enemyClockText.setString(toClock(enemyTime));
+        myClockText.setString(toClock(myTime));
+
+        if(myTime == 0){
+            network.sendMyTimeout();
+            gameover.setWinner(!myColor);
+            state = STATE::GameOver;
+        }
+        else if(enemyTime == 0){
+            network.sendEnemyTimeout();
+            gameover.setWinner(myColor);
+            state = STATE::GameOver;
+        }
+
         sf::Event event;
         while (mainWindow.pollEvent(event)){
             handleEvent(event, state);
@@ -119,24 +203,41 @@ int Game::Run(STATE& state){
                     b.pieces[iP][jP].changePiece(b.pieces, i, jP-1, iP, j-2);
                 }
                 makeEnemyMove(i, j, iP, jP);
+                b.pieces[i][j].moves++;
                 if(check){
                     check = true;
+                    warnings.setString("Check!");
                     logCheck();
                 }
                 testCheck.updateAttackBoard(b.pieces);
                 TurnIndicator.changeTurn();
+                enemyClock.restart();
             break;
+
+            case packetID::MoveLog:
+                network.receiveMoveLog(history.history);
+            break;
+
             case packetID::Checkmate:
-                //state = STATE::GameOver;
                 logCheck();
                 cout << history.history << endl;
                 cout << "Game over! " << (myColor? "Black wins!" : "White wins!") << endl;
-                state = STATE::Lobby;
+                gameover.setWinner(!myColor);
+                state = STATE::GameOver;
+            break;
+            case packetID::Chat:
+                msg = network.receiveChat();
+                chat.receiveMessage(msg);
             break;
             case packetID::GameEnd:
+
                 state = STATE::Lobby;
                 //network.sendDisconnect();
                 //mainWindow.close();
+            break;
+            case packetID::GameEndTimeOut:
+                gameover.setWinner(!myColor);
+                state = STATE::Lobby;
             break;
         }
         mainWindow.clear(sf::Color(0, 150, 255));
@@ -149,7 +250,10 @@ int Game::Run(STATE& state){
    // if(!Tabuleiro.loadFromFile("media/images/board.jpg")) return 1;
    // board.setTexture(Tabuleiro);
 
-    draw();
+    if(state == STATE::GameOver){
+        chat.history.clear();
+        gameover.run(state);
+    }
 }
 
 void Unhighlight(Piece b[8][8]){
@@ -264,16 +368,32 @@ void Game::logCheck(){
 }
 
 void Game::makeEnemyMove(int i, int j, int iP, int jP){
-    b.pieces[i][j].code = b.pieces[iP][jP].code;
+
     if(b.pieces[i][j].color == !b.pieces[iP][jP].color)
         logCapture(i, j, iP, jP);
     else
         logMove(i, j, iP, jP);
+
+    if(b.pieces[iP][jP].type == PAWN &&
+       b.pieces[i][j].type == BLANK){ //en passant
+        if(jP == j + 1){
+            b.pieces[iP][j].type = BLANK;
+            b.pieces[iP][j].code = "";
+            b.pieces[iP][j].color = -1;
+        }
+        else if(jP == j - 1){
+            b.pieces[iP][j].type = BLANK;
+            b.pieces[iP][j].code = "";
+            b.pieces[iP][j].color = -1;
+        }
+
+    }
     b.pieces[i][j].hasMoved = true;
+    b.pieces[i][j].code = b.pieces[iP][jP].code;
     b.pieces[i][j].type = b.pieces[iP][jP].type;
+    b.pieces[i][j].color = b.pieces[iP][jP].color;
     b.pieces[iP][jP].type = BLANK;
     b.pieces[iP][jP].code = "";
-    b.pieces[i][j].color = b.pieces[iP][jP].color;
     b.pieces[iP][jP].color = -1;
     Initialize_Texture(b.pieces);
     turn = !turn;
@@ -282,26 +402,33 @@ void Game::makeEnemyMove(int i, int j, int iP, int jP){
 }
 
 void Game::handleEvent(const sf::Event& event, STATE& state){
-    char letter;
+    char input;
     switch(event.type){
         case sf::Event::Closed:
             network.sendDisconnect();
             mainWindow.close();
         break;
         case sf::Event::TextEntered:
-            letter = static_cast<char>(event.text.unicode);
+            input = static_cast<char>(event.text.unicode);
+            chat.handleInput(network, input);
         break;
         case sf::Event::MouseButtonPressed:
             if(HandleInput(event.mouseButton.x, event.mouseButton.y)){
                 network.sendMove(this->i, this->j, iPiece, jPiece, enemyCheck);
+                network.sendMoveLog(history.currentMove + ";");
                 TurnIndicator.changeTurn();
+                cout << history.history << endl;
                 if(checkMate){
                     network.sendCheckMate();
+                    gameover.setWinner(myColor);
                     //state == STATE::GameOver;
-                    cout << history.history << endl;
                     cout << "Game over! " << (myColor? "White wins!" : "Black wins!") << endl;
-                    state = STATE::Lobby;
+                    state = STATE::GameOver;
                 }
+                myClock.restart();
+            }
+            else if(chat.rectChatBox.contains(event.mouseButton.x, event.mouseButton.y)){
+                chat.active = true;
             }
         break;
     }
@@ -335,6 +462,7 @@ bool Game::HandleInput(int x, int y){
                             pieceClick = false;
                             turn = !turn;
                             moveCount++;
+                            check = false;
                             logCapture(i, j, iPiece, jPiece);
                             testCheck.updateAttackBoard(b.pieces);
                             if(testCheck.testCheck(b.pieces, myColor)){
@@ -358,6 +486,7 @@ bool Game::HandleInput(int x, int y){
                         if(b.pieces[i][j].movement(b.pieces, i, j, iPiece, jPiece, check)){
                             b.pieces[i][j].hasMoved = true;
                             turn = !turn;
+                            check = false;
                             moveCount++;
                             logMove(i, j, iPiece, jPiece);
                             testCheck.updateAttackBoard(b.pieces);
@@ -368,6 +497,7 @@ bool Game::HandleInput(int x, int y){
                                 if(testCheck.testCheckMate(b.pieces, myColor)){
                                     cout << "Checkmate!" << endl;
                                     history.currentMove += "+";
+                                    checkMate = true;
                                 }
                             }
                             Initialize_Texture(b.pieces);
@@ -388,4 +518,5 @@ bool Game::HandleInput(int x, int y){
         Hint.action();
         return false;
     }
+    return false;
 }

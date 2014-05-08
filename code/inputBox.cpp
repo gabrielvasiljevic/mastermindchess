@@ -3,7 +3,8 @@
 #include <iostream>
 
 
-inputBox::inputBox(int x, int y, int size_x, int size_y, std::string desc, int text_x, int text_y) : Interface_Element(x, y, size_x, size_y){
+inputBox::inputBox(int x, int y, int size_x, int size_y, std::string desc, int text_x, int text_y) :
+                                                            Interface_Element(x, y, size_x, size_y){
     this->font.loadFromFile("media/fonts/AGENCYB.TTF");
     this->text.setFont(this->font);
     this->text.setPosition(text_x, text_y);

@@ -2,14 +2,13 @@
 #define GAME
 #include <iostream>
 #include "board.h"
+#include "chat.h"
+#include "gameover.h"
 #include "checkbox.h"
 #include "checkmate.h"
 #include "turnIndicator.h"
 #include "networkHandler.h"
 #include "dataTypes.h"
-
-
-
 
 
 struct matchHistory{
@@ -23,21 +22,31 @@ struct matchHistory{
 class Game{
     public:
         Board b;
-        Checkbox Hint;
-        matchHistory history;
-        CheckMate testCheck;
-        NetworkHandler &network;
-        turnIndicator TurnIndicator;
-        sf::Sprite board;
-        sf::Sprite background;
-        sf::Texture* backgroundTexture;
-        sf::Texture* boardTexture;
+        Checkbox        Hint;
+        matchHistory    history;
+        CheckMate       testCheck;
+        Gameover        gameover;
+        Chat            chat;
+        NetworkHandler  &network;
+        turnIndicator   TurnIndicator;
+        sf::Font        font;
+        sf::Text        warnings;
+        sf::Clock       myClock;
+        sf::Clock       enemyClock;
+        sf::Text        myClockText;
+        sf::Text        enemyClockText;
+        sf::Sprite      board;
+        sf::Sprite      background;
+        sf::Texture*    backgroundTexture;
+        sf::Texture*    boardTexture;
         sf::RenderWindow &mainWindow;
-        int i, j, iPiece, jPiece;
-        int turn, myColor, moveCount;
-        bool check;
-        bool enemyCheck;
-        bool checkMate;
+        int             i, j, iPiece, jPiece;
+        int             turn, myColor, moveCount;
+        double          myTime, enemyTime;
+        bool            check;
+        bool            enemyCheck;
+        bool            checkMate;
+
         bool HandleInput(int x, int y);
         void handleEvent(const sf::Event& event, STATE& state);
         void draw();

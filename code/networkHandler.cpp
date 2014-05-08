@@ -3,6 +3,8 @@
 
 using namespace std;
 
+
+
 bool NetworkHandler::connect (string ip, int port) {
     server.setBlocking (true);
     server.disconnect();
@@ -31,12 +33,31 @@ void NetworkHandler::receiveConnect(){
     cout << "Connection received, estabilished connection with " << enemyID << "...\n";
 }
 
+vector<userInfo> NetworkHandler::receivePlayerList(){
+   int i, listSize;
+   vector<userInfo> playerList;
+   userInfo player;
+   string nick;
+   int status;
+   packet >> listSize;
+   for(i = 0; i < listSize; i++){
+        packet >> player.nickname;
+        packet >> status;
+        player.status = static_cast<statusID>(status);
+        playerList.emplace_back(player);
+   }
+   return playerList;
+}
+
 bool NetworkHandler::receiveLoginResponse() {
     bool correct = false;
-    packet >> correct;
+    string name;
+    packet >> correct >> name;
 
-    if (correct)
+    if (correct){
         myID = player_id;
+        myName = name;
+    }
 
     return correct;
 }
@@ -49,7 +70,7 @@ bool NetworkHandler::receiveRegisterResponse() {
 }
 
 
-string NetworkHandler::receiveChat () {
+string NetworkHandler::receiveChat(){
     std::string msg;
     packet >> msg;
     return msg;
@@ -67,15 +88,15 @@ void NetworkHandler::buildHeader (packetID pid) {
     packet << static_cast<int> (pid);
 }
 
-void NetworkHandler::sendLogin(std::string name, std::string password) {
+void NetworkHandler::sendLogin(std::string name, std::string password, std::string version) {
     buildHeader (packetID::Login);
-    packet << name << password;
+    packet << name << password << version;
     server.send(packet);
 }
 
-void NetworkHandler::sendRegister(std::string name, std::string password) {
+void NetworkHandler::sendRegister(string usernameBuffer, string passwordBuffer, string nicknameBuffer, string emailBuffer) {
     buildHeader (packetID::Register);
-    packet << name << password;
+    packet << usernameBuffer << passwordBuffer << nicknameBuffer << emailBuffer;
     server.send(packet);
 }
 
@@ -111,21 +132,47 @@ void NetworkHandler::sendCheckMate(){
    buildHeader (packetID::Checkmate);
    server.send(packet);
    cout << "Checkmate sended" << endl;
+   enemyID = -1;
 }
 
 void NetworkHandler::receiveMove(int* i, int* j, int* iP, int* jP, bool* check){
     packet >> *i >> *j >> *iP >> *jP >> *check;
     cout << "Movement received from" << " [" << enemyID << "]" << endl;
-    cout << "Moving piece from [" << *iP << "][" << *jP << "] to [" << *i << "][" << *j << "]." <<endl;
+    cout << "Moving piece from [" << *iP << "][" << *jP << "] to [" << *i << "][" << *j << "]." << endl;
     if(*check == true){
         cout << "Check!" << endl;
     }
+}
+
+void NetworkHandler::sendMyTimeout(){
+    buildHeader(packetID::GameEndTimeOut);
+    packet << myID;
+    server.send(packet);
+}
+
+void NetworkHandler::sendEnemyTimeout(){
+    buildHeader(packetID::GameEndTimeOut);
+    packet << enemyID;
+    server.send(packet);
+}
+
+void NetworkHandler::receiveMoveLog(string& history){
+    string log;
+    packet >> log;
+    history += log;
+}
+
+void NetworkHandler::sendMoveLog(string moveLog){
+    buildHeader (packetID::MoveLog);
+    packet << moveLog;
+    server.send(packet);
 }
 
 void NetworkHandler::sendGameEnd(){
     buildHeader (packetID::GameEnd);
     server.send(packet);
     cout << "[" << myID << "] GameEnd sended\n";
+    enemyID = -1;
 }
 
 void NetworkHandler::sendDisconnect(){
@@ -143,6 +190,12 @@ void NetworkHandler::sendNegative(){
 
 void NetworkHandler::sendGameRequest(){
     buildHeader(packetID::GameRequest);
+    server.send(packet);
+    cout << "Game request sended. Waiting answer..." << endl;
+}
+
+void NetworkHandler::sendCapaGameRequest(){
+    buildHeader(packetID::CapaGameRequest);
     server.send(packet);
     cout << "Game request sended. Waiting answer..." << endl;
 }

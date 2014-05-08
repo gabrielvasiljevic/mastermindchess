@@ -22,7 +22,7 @@ using namespace sf;
 
 STATE state = STATE::Login;
 
-string VERSION = "0.1.4";
+string VERSION = "0.1.5";
 
 Packet packet;
 
@@ -37,15 +37,15 @@ int optColor = 1;
 bool check;
 sf::Text temporary;
 sf::Font tempfont;
-string username, password;
+//string username, password;
 
-
+/*
 void Highlight(Piece b[8][8], TYPE t, int i, int j);
 void HighlightTower(Piece b[8][8], int i, int j);
 void HighlightBishop(Piece b[8][8], int i, int j);
 void Unhighlight(Piece b[8][8]);
 void Initialize_Texture(Piece b[8][8]);
-
+*/
 
 
 int main(){

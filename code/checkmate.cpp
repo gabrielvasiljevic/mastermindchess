@@ -4,7 +4,6 @@
 using namespace std;
 
 int color;
-
 //Extremely sensitive, enormous and complex algorithm. Do not touch, as only God knows what lies below this comment!
 
 void CheckMate::resetAttackBoard(Piece board[8][8]){
@@ -19,6 +18,22 @@ void CheckMate::resetAttackBoard(Piece board[8][8]){
 
         }
     }
+}
+
+bool CheckMate::testIfStillInCheck(Piece pieces[8][8], int i, int j, int iX, int iY){
+    int color = pieces[i][j].color;
+    if(pieces[i][j].type == KING) return true;
+    cout << "Type: " << static_cast<int>(pieces[i][j].type) << endl;
+    pieces[i][j].changePiece(pieces, i, j, iX, iY);
+    updateAttackBoard(pieces);
+    if(testCheck(pieces, !color)){
+        pieces[i][j].changeBack(pieces, i, j, iX, iY);
+        updateAttackBoard(pieces);
+        return true; //yes, still in check
+    }
+    pieces[i][j].changeBack(pieces, i, j, iX, iY);
+    updateAttackBoard(pieces);
+    return false;
 }
 
 void CheckMate::updateBoard(Piece pieces[8][8], TYPE t, int i, int j){
@@ -391,11 +406,11 @@ void CheckMate::updateAttackBoard(Piece board[8][8]){
     }
 }
 
-bool CheckMate::testCheck(Piece pieces[8][8], int color){ //color is the color of the king I want to check if it is in check.
+bool CheckMate::testCheck(Piece pieces[8][8], int color){ //color is the opposite color of the king I want to check if it is in check.
     int i, j, iKing, jKing;
     for(i = 0; i < 8; i++){
         for(j = 0; j < 8; j++){
-            if(pieces[i][j].color == !color && pieces[i][j].type == KING){
+            if(pieces[i][j].color != color && pieces[i][j].type == KING){
                 iKing = i;
                 jKing = j;
                 break;
@@ -414,6 +429,7 @@ bool CheckMate::testCheck(Piece pieces[8][8], int color){ //color is the color o
 
 bool CheckMate::testCheckMate(Piece pieces[8][8], int color){
     int i, j, iKing, jKing;
+    bool stop = false;
     for(i = 0; i < 8; i++){
         for(j = 0; j < 8; j++){
             if(pieces[i][j].color == !color && pieces[i][j].type == KING){
@@ -423,7 +439,8 @@ bool CheckMate::testCheckMate(Piece pieces[8][8], int color){
             }
         }
     }
-    if(!testKingMove(pieces,iKing, jKing)){
+    cout << "The king is at " << iKing << " " << jKing << endl;
+    if(!testKingMove(pieces, iKing, jKing)){
         if(!testCaptureMove(pieces, iKing, jKing)){
             if(!testBlockMove(pieces, iKing, jKing)){
                 cout << "No one can block" << endl;
@@ -443,7 +460,7 @@ bool CheckMate::testKingMove(Piece pieces[8][8], int iKing, int jKing){
         if(pieces[iKing + 1][jKing].type == BLANK){
             for(i = 0; i < 8; i++){
                 for(j = 0; j < 8; j++){
-                    if(pieces[i][j].color == !color && pieces[i][j].attackBoard[iKing+1][jKing]){
+                    if(pieces[i][j].color != color && pieces[i][j].attackBoard[iKing+1][jKing]){
                         squares--;
                         i = 8;
                         j = 8;
@@ -466,6 +483,7 @@ bool CheckMate::testKingMove(Piece pieces[8][8], int iKing, int jKing){
             }
             else squares--;
         }
+        else squares--;
         if(jKing + 1 < 8){
             if(pieces[iKing + 1][jKing + 1].type == BLANK){
                 for(i = 0; i < 8; i++){
@@ -480,6 +498,7 @@ bool CheckMate::testKingMove(Piece pieces[8][8], int iKing, int jKing){
             }
             else squares--;
         }
+        else squares--;
     }
     else{
         squares -= 3;
@@ -511,6 +530,7 @@ bool CheckMate::testKingMove(Piece pieces[8][8], int iKing, int jKing){
             }
             else squares--;
         }
+        else squares--;
         if(jKing + 1 < 8){
             if(pieces[iKing - 1][jKing + 1].type == BLANK){
                 for(i = 0; i < 8; i++){
@@ -525,6 +545,7 @@ bool CheckMate::testKingMove(Piece pieces[8][8], int iKing, int jKing){
             }
             else squares--;
         }
+        else squares--;
     }
     else{
         squares -= 3;
@@ -541,10 +562,9 @@ bool CheckMate::testKingMove(Piece pieces[8][8], int iKing, int jKing){
                 }
             }
         }
-        else{
-            squares--;
-        }
+        else squares--;
     }
+    else squares--;
     if(jKing - 1 > 0){
         if(pieces[iKing][jKing - 1].type == BLANK){
             for(i = 0; i < 8; i++){
@@ -581,22 +601,27 @@ bool CheckMate::testBlockTower(Piece pieces[8][8], int iTower, int jTower, int i
                     if(pieces[i][j].color == color && pieces[i][j].type != KING){
                         for(k = jTower + 1; k < jKing; k++){
                             if(pieces[i][j].attackBoard[iTower][k] == 1){
+                                if(testIfStillInCheck(pieces, i, j, iTower, k)) return false;
                                 return true;
                             }
                             else if(pieces[i][j].type == PAWN){
                                 if(pieces[i][j].color == 1){
                                     if(i + 1 == iTower && j == k){
+                                        if(testIfStillInCheck(pieces, i, j, iTower, k)) return false;
                                         return true;
                                     }
                                     else if(!pieces[i][j].hasMoved && i + 2 == iTower && j == k){
+                                        if(testIfStillInCheck(pieces, i, j, iTower, k)) return false;
                                         return true;
                                     }
                                 }
                                 else{
                                     if(i - 1 == iTower && j == k){
+                                        if(testIfStillInCheck(pieces, i, j, iTower, k)) return false;
                                         return true;
                                     }
                                     else if(!pieces[i][j].hasMoved && i - 2 == iTower && j == k){
+                                        if(testIfStillInCheck(pieces, i, j, iTower, k)) return false;
                                         return true;
                                     }
                                 }
@@ -613,22 +638,27 @@ bool CheckMate::testBlockTower(Piece pieces[8][8], int iTower, int jTower, int i
                     if(pieces[i][j].color == color && pieces[i][j].type != KING){
                         for(k = jTower - 1; k > jKing; k--){
                             if(pieces[i][j].attackBoard[iTower][k] == 1){
+                                if(testIfStillInCheck(pieces, i, j, iTower, k)) return false;
                                 return true;
                             }
                             else if(pieces[i][j].type == PAWN){
                                 if(pieces[i][j].color == 1){
                                     if(i + 1 == iTower && j == k){
+                                        if(testIfStillInCheck(pieces, i, j, iTower, k)) return false;
                                         return true;
                                     }
                                     else if(!pieces[i][j].hasMoved && i + 2 == iTower && j == k){
+                                        if(testIfStillInCheck(pieces, i, j, iTower, k)) return false;
                                         return true;
                                     }
                                 }
                                 else{
                                     if(i - 1 == iTower && j == k){
+                                        if(testIfStillInCheck(pieces, i, j, iTower, k)) return false;
                                         return true;
                                     }
                                     else if(!pieces[i][j].hasMoved && i - 2 == iTower && j == k){
+                                        if(testIfStillInCheck(pieces, i, j, iTower, k)) return false;
                                         return true;
                                     }
                                 }
@@ -646,8 +676,11 @@ bool CheckMate::testBlockTower(Piece pieces[8][8], int iTower, int jTower, int i
                 for(j = 0; j < 8; j++){
                     if(pieces[i][j].color == color && pieces[i][j].type != KING){
                         for(k = iTower + 1; k < iKing; k++){
-                            if(pieces[i][j].attackBoard[k][jTower] == 1)
+                            if(pieces[i][j].attackBoard[k][jTower] == 1){
+                                if(testIfStillInCheck(pieces, i, j, k, jTower)) return false;
                                 return true;
+                            }
+
                         }
                     }
                 }
@@ -659,8 +692,10 @@ bool CheckMate::testBlockTower(Piece pieces[8][8], int iTower, int jTower, int i
                 for(j = 0; j < 8; j++){
                     if(pieces[i][j].color == color && pieces[i][j].type != KING){
                         for(k = iTower - 1; k > iKing; k--){
-                            if(pieces[i][j].attackBoard[k][jTower] == 1)
+                            if(pieces[i][j].attackBoard[k][jTower] == 1){
+                               if(testIfStillInCheck(pieces, i, j, k, jTower)) return false;
                                 return true;
+                            }
                         }
                     }
                 }
@@ -681,22 +716,27 @@ bool CheckMate::testBlockBishop(Piece pieces[8][8], int iBishop, int jBishop, in
                     if(pieces[i][j].color == color){
                         for(k = iBishop + 1, p = jBishop + 1; k < iKing && p < jKing; k++, p++){
                             if(pieces[i][j].attackBoard[k][p] == 1){
+                                if(testIfStillInCheck(pieces, i, j, k, p)) return false;
                                 return true;
                             }
                             else if(pieces[i][j].type == PAWN){
                                 if(pieces[i][j].color == 1){
                                     if(i + 1 == k && j == p){
+                                        if(testIfStillInCheck(pieces, i, j, k, p)) return false;
                                         return true;
                                     }
                                     else if(!pieces[i][j].hasMoved && i + 2 == k && j == p){
+                                        if(testIfStillInCheck(pieces, i, j, k, p)) return false;
                                         return true;
                                     }
                                 }
                                 else{
                                     if(i - 1 == k && j == p){
+                                        if(testIfStillInCheck(pieces, i, j, k, p)) return false;
                                         return true;
                                     }
                                     else if(!pieces[i][j].hasMoved && i - 2 == k && j == p){
+                                        if(testIfStillInCheck(pieces, i, j, k, p)) return false;
                                         return true;
                                     }
                                 }
@@ -713,22 +753,27 @@ bool CheckMate::testBlockBishop(Piece pieces[8][8], int iBishop, int jBishop, in
                     if(pieces[i][j].color == color){
                         for(k = iBishop + 1, p = jBishop - 1; k < iKing && p > jKing; k++, p--){
                             if(pieces[i][j].attackBoard[k][p] == 1){
+                                if(testIfStillInCheck(pieces, i, j, k, p)) return false;
                                 return true;
                             }
                             else if(pieces[i][j].type == PAWN){
                                 if(pieces[i][j].color == 1){
                                     if(i + 1 == k && j == p){
+                                        if(testIfStillInCheck(pieces, i, j, k, p)) return false;
                                         return true;
                                     }
                                     else if(!pieces[i][j].hasMoved && i + 2 == k && j == p){
+                                        if(testIfStillInCheck(pieces, i, j, k, p)) return false;
                                         return true;
                                     }
                                 }
                                 else{
                                     if(i - 1 == k && j == p){
+                                        if(testIfStillInCheck(pieces, i, j, k, p)) return false;
                                         return true;
                                     }
                                     else if(!pieces[i][j].hasMoved && i - 2 == k && j == p){
+                                        if(testIfStillInCheck(pieces, i, j, k, p)) return false;
                                         return true;
                                     }
                                 }
@@ -747,22 +792,27 @@ bool CheckMate::testBlockBishop(Piece pieces[8][8], int iBishop, int jBishop, in
                     if(pieces[i][j].color == color){
                         for(k = iBishop - 1, p = jBishop + 1; k > iKing && p < jKing; k--, p++){
                             if(pieces[i][j].attackBoard[k][p] == 1){
+                                if(testIfStillInCheck(pieces, i, j, k, p)) return false;
                                 return true;
                             }
                             else if(pieces[i][j].type == PAWN){
                                 if(pieces[i][j].color == 1){
                                     if(i + 1 == k && j == p){
+                                        if(testIfStillInCheck(pieces, i, j, k, p)) return false;
                                         return true;
                                     }
                                     else if(!pieces[i][j].hasMoved && i + 2 == k && j == p){
+                                        if(testIfStillInCheck(pieces, i, j, k, p)) return false;
                                         return true;
                                     }
                                 }
                                 else{
                                     if(i - 1 == k && j == p){
+                                        if(testIfStillInCheck(pieces, i, j, k, p)) return false;
                                         return true;
                                     }
                                     else if(!pieces[i][j].hasMoved && i - 2 == k && j == p){
+                                        if(testIfStillInCheck(pieces, i, j, k, p)) return false;
                                         return true;
                                     }
                                 }
@@ -779,22 +829,27 @@ bool CheckMate::testBlockBishop(Piece pieces[8][8], int iBishop, int jBishop, in
                     if(pieces[i][j].color == color){
                         for(k = iBishop - 1, p = jBishop - 1; k > iKing && p > jKing; k--, p--){
                             if(pieces[i][j].attackBoard[k][p] == 1){
+                                if(testIfStillInCheck(pieces, i, j, k, p)) return false;
                                 return true;
                             }
                             else if(pieces[i][j].type == PAWN){
                                 if(pieces[i][j].color == 1){
                                     if(i + 1 == k && j == p){
+                                        if(testIfStillInCheck(pieces, i, j, k, p)) return false;
                                         return true;
                                     }
                                     else if(!pieces[i][j].hasMoved && i + 2 == k && j == p){
+                                        if(testIfStillInCheck(pieces, i, j, k, p)) return false;
                                         return true;
                                     }
                                 }
                                 else{
                                     if(i - 1 == k && j == p){
+                                        if(testIfStillInCheck(pieces, i, j, k, p)) return false;
                                         return true;
                                     }
                                     else if(!pieces[i][j].hasMoved && i - 2 == k && j == p){
+                                        if(testIfStillInCheck(pieces, i, j, k, p)) return false;
                                         return true;
                                     }
                                 }
@@ -840,7 +895,7 @@ bool CheckMate::testCaptureMove(Piece pieces[8][8], int iKing, int jKing){
     int color = pieces[iKing][jKing].color;
     for(i = 0; i < 8; i++){
         for(j = 0; j < 8; j++){
-            if(pieces[i][j].color == !color && pieces[i][j].attackBoard[iKing][jKing] == 1){
+            if(pieces[i][j].color != color && pieces[i][j].attackBoard[iKing][jKing] == 1){
                 if(testCapture(pieces, i, j)){
                     canCapture = true;
                 }
@@ -859,21 +914,23 @@ bool CheckMate::testCapture(Piece pieces[8][8], int iX, int jX){
     int color = pieces[iX][jX].color;
     for(i = 0; i < 8; i++){
         for(j = 0; j < 8; j++){
-            if(pieces[i][j].color == !color && pieces[i][j].attackBoard[iX][jX] == 1){
+            if(pieces[i][j].color != color && pieces[i][j].attackBoard[iX][jX] == 1){
                 if(pieces[i][j].type == KING){
-                    pieces[i][j].changePiece(pieces, i, j, iX, jX);
+                    pieces[i][j].changePiece(pieces, iX, jX, i, j);
                     updateAttackBoard(pieces);
-                    if(testCheck(pieces, !pieces[i][j].color)){
-                        pieces[i][j].changePiece(pieces, iX, jX, i, j);
+                    if(testCheck(pieces, color)){
+                        pieces[iX][jX].changeBack(pieces, iX, jX, i, j);
                         updateAttackBoard(pieces);
+                        return false;
                     }
-                    return false;
+                    pieces[iX][jX].changeBack(pieces, iX, jX, i, j);
+                    updateAttackBoard(pieces);
                 }
                 return true;
             }
-
         }
     }
+    return false;
 }
 
 bool CheckMate::testKingAttack(Piece piece, int iKing, int jKing){

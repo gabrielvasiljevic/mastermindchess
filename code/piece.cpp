@@ -46,403 +46,110 @@ void Piece::changeBack(Piece board[8][8], int i, int j, int iP, int jP){
     board[i][j].color = colorChange;
 }
 
-bool Piece::movement(Piece board[8][8], int i, int j, int iP, int jP, bool check){ //iP and jP = piece clicked. i and j = current square clicked.
-    bool control = false; //control loops
-    int k, p;
-    switch(board[iP][jP].type){
-        case PAWN:
-            if(board[iP][jP].color == 1){
-                if((i == iP + 1 && j == jP) || (iP == 1 && i == iP + 2 && j == jP)){
-                    changePiece(board, i, j, iP, jP);
-                    if(check){
-                        testCheck.updateAttackBoard(board);
-                        if(testCheck.testCheck(board, !board[i][j].color)){
-                            changePiece(board, iP, jP, i, j);
-                            testCheck.updateAttackBoard(board);
-                            cout << "You must not stay in check!" << endl;
-                            return false;
-                        }
-                    }
-                    return true;
-                }
+bool Piece::pawnMovement(Piece board[8][8], int i, int j, int iP, int jP, bool check){
+    if(board[iP][jP].color == 1){
+        if((i == iP + 1 && j == jP) || (iP == 1 && i == iP + 2 && j == jP)){
+            changePiece(board, i, j, iP, jP);
+            testCheck.updateAttackBoard(board);
+            if(testCheck.testCheck(board, !board[i][j].color)){
+                changeBack(board, i, j, iP, jP);
+                testCheck.updateAttackBoard(board);
+                cout << "You must not stay in check!" << endl;
                 return false;
             }
-            else{
-                if((i == iP - 1 && j == jP) || (iP == 6 && i == iP - 2 && j == jP)){
-                    changePiece(board, i, j, iP, jP);
-                    testCheck.updateAttackBoard(board);
-                    if(check){
-                        if(testCheck.testCheck(board, !board[i][j].color)){
-                            changePiece(board, iP, jP, i, j);
-                            testCheck.updateAttackBoard(board);
-                            cout << "You must not stay in check!" << endl;
-                            return false;
-                        }
-                    }
-                    return true;
-                }
-                return false;
-            }
-        break;
-        case TOWER:
-            if(i == iP){ //same row
-                if(j > jP){ //to the right
-                    for(k = jP + 1; k < j && !control; k++){ //loop until reach the piece clicked
-                        if(board[i][k].type != BLANK){ //test if all the pieces between the two are blank
-                            control = true; //stop the loop
-                        }
-                    }
-                    if(!control){ //if they are, the piece can be captured
-                        changePiece(board, i, j, iP, jP);
-                        if(check){
-                            testCheck.updateAttackBoard(board);
-                            if(testCheck.testCheck(board, !board[i][j].color)){
-                                changePiece(board, iP, jP, i, j);
-                                testCheck.updateAttackBoard(board);
-                                cout << "You must not stay in check!" << endl;
-                                return false;
-                            }
-                        }
-                        return true;
-                    }
-                }
-                else{ //to the left
-                    for(k = jP - 1; k > j && !control; k--){ //loop until reach the piece clicked
-                        if(board[i][k].type != BLANK){ //test if all the pieces between the two are blank
-                            control = true; //stop the loop
-                        }
-                    }
-                    if(!control){ //if they are, the piece can be captured
-                        changePiece(board, i, j, iP, jP);
-                        if(check){
-                            testCheck.updateAttackBoard(board);
-                            if(testCheck.testCheck(board, !board[i][j].color)){
-                                changePiece(board, iP, jP, i, j);
-                                testCheck.updateAttackBoard(board);
-                                cout << "You must not stay in check!" << endl;
-                                return false;
-                            }
-                        }
-                        return true;
-                    }
-                }
-            }
-            else if(j == jP){ //same column
-                if(i > iP){ //to the front
-                    for(k = iP + 1; k < i && !control; k++){ //loop until reach the piece clicked
-                        if(board[k][j].type != BLANK){ //test if all the pieces between the two are blank
-                            control = true; //stop the loop
-                        }
-                    }
-                    if(!control){ //if they are, the piece can be captured
-                        changePiece(board, i, j, iP, jP);
-                        if(check){
-                            testCheck.updateAttackBoard(board);
-                            if(testCheck.testCheck(board, !board[i][j].color)){
-                                changePiece(board, iP, jP, i, j);
-                                testCheck.updateAttackBoard(board);
-                                cout << "You must not stay in check!" << endl;
-                                return false;
-                            }
-                        }
-                        return true;
-                    }
-                }
-                else{ //to the left
-                    for(k = iP - 1; k > i && !control; k--){ //loop until reach the piece clicked
-                        if(board[k][j].type != BLANK){ //test if all the pieces between the two are blank
-                            control = true; //stop the loop
-                        }
-                    }
-                    if(!control){ //if they are, the piece can be captured
-                        changePiece(board, i, j, iP, jP);
-                        if(check){
-                            testCheck.updateAttackBoard(board);
-                            if(testCheck.testCheck(board, !board[i][j].color)){
-                                changePiece(board, iP, jP, i, j);
-                                testCheck.updateAttackBoard(board);
-                                cout << "You must not stay in check!" << endl;
-                                return false;
-                            }
-                        }
-                        return true;
-                    }
-                }
-
-            }
-            return false;
-        break;
-        case BISHOP:
-            control = false;
-            if(abs(i - iP) == abs(j - jP)){ //if the difference is the same, they are on the same diagonal
-                if(i > iP){ // front
-                    if(j > jP){ //front-right
-                        for(k = iP + 1, p = jP + 1; k < i && p < j && !control ; k++, p++){
-                            if(board[k][p].type != BLANK){ //test if all the pieces between the two are blank
-                                control = true; //stop the loop
-                            }
-                        }
-                        if(!control){ //if they are, the piece can be captured
-                            changePiece(board, i, j, iP, jP);
-                            testCheck.updateAttackBoard(board);
-                            if(check){
-                                if(testCheck.testCheck(board, !board[i][j].color)){
-                                    changePiece(board, iP, jP, i, j);
-                                    testCheck.updateAttackBoard(board);
-                                    cout << "You must not stay in check!" << endl;
-                                    return false;
-                                }
-                            }
-                            return true;
-                        }
-                    }
-                    else{ //front-left
-                        for(k = iP + 1, p = jP - 1; k < i && p > j && !control ; k++, p--){
-                            if(board[k][p].type != BLANK){ //test if all the pieces between the two are blank
-                                control = true; //stop the loop
-                            }
-                        }
-                        if(!control){ //if they are, the piece can be captured
-                            changePiece(board, i, j, iP, jP);
-                            testCheck.updateAttackBoard(board);
-                            if(check){
-                                if(testCheck.testCheck(board, !board[i][j].color)){
-                                    changePiece(board, iP, jP, i, j);
-                                    testCheck.updateAttackBoard(board);
-                                    cout << "You must not stay in check!" << endl;
-                                    return false;
-                                }
-                            }
-                            return true;
-                        }
-                    }
-                }
-                else{ //back
-                    if(j > jP){ //back-right
-                        for(k = iP - 1, p = jP + 1; k > i && p < j && !control ; k--, p++){
-                            if(board[k][p].type != BLANK){ //test if all the pieces between the two are blank
-                                control = true; //stop the loop
-                            }
-                        }
-                        if(!control){ //if they are, the piece can be captured
-                            changePiece(board, i, j, iP, jP);
-                            testCheck.updateAttackBoard(board);
-                            if(check){
-                                if(testCheck.testCheck(board, !board[i][j].color)){
-                                    changePiece(board, iP, jP, i, j);
-                                    testCheck.updateAttackBoard(board);
-                                    cout << "You must not stay in check!" << endl;
-                                    return false;
-                                }
-                            }
-                            return true;
-                        }
-                    }
-                    else{ //back-left
-                        for(k = iP - 1, p = jP - 1; k > i && p > j && !control ; k--, p--){
-                            if(board[k][p].type != BLANK){ //test if all the pieces between the two are blank
-                                control = true; //stop the loop
-                            }
-                        }
-                        if(!control){ //if they are, the piece can be captured
-                            changePiece(board, i, j, iP, jP);
-                            testCheck.updateAttackBoard(board);
-                            if(check){
-                                if(testCheck.testCheck(board, !board[i][j].color)){
-                                    changePiece(board, iP, jP, i, j);
-                                    testCheck.updateAttackBoard(board);
-                                    cout << "You must not stay in check!" << endl;
-                                    return false;
-                                }
-                            }
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
-        break;
-        case QUEEN:
-            if(i == iP){ //same row
-                if(j > jP){ //to the right
-                    for(k = jP + 1; k < j && !control; k++){ //loop until reach the piece clicked
-                        if(board[i][k].type != BLANK){ //test if all the pieces between the two are blank
-                            control = true; //stop the loop
-                        }
-                    }
-                    if(!control){ //if they are, the piece can be captured
-                        changePiece(board, i, j, iP, jP);
-                        testCheck.updateAttackBoard(board);
-                        if(check){
-                            if(testCheck.testCheck(board, !board[i][j].color)){
-                                changePiece(board, iP, jP, i, j);
-                                testCheck.updateAttackBoard(board);
-                                cout << "You must not stay in check!" << endl;
-                                return false;
-                            }
-                        }
-                        return true;
-                    }
-                }
-                else{ //to the left
-                    for(k = jP - 1; k > j && !control; k--){ //loop until reach the piece clicked
-                        if(board[i][k].type != BLANK){ //test if all the pieces between the two are blank
-                            control = true; //stop the loop
-                        }
-                    }
-                    if(!control){ //if they are, the piece can be captured
-                        changePiece(board, i, j, iP, jP);
-                        testCheck.updateAttackBoard(board);
-                        if(check){
-                            if(testCheck.testCheck(board, !board[i][j].color)){
-                                changePiece(board, iP, jP, i, j);
-                                testCheck.updateAttackBoard(board);
-                                cout << "You must not stay in check!" << endl;
-                                return false;
-                            }
-                        }
-                        return true;
-                    }
-                }
-            }
-            else if(j == jP){ //same column
-                if(i > iP){ //to the front
-                    for(k = iP + 1; k < i && !control; k++){ //loop until reach the piece clicked
-                        if(board[k][j].type != BLANK){ //test if all the pieces between the two are blank
-                            control = true; //stop the loop
-                        }
-                    }
-                    if(!control){ //if they are, the piece can be captured
-                        changePiece(board, i, j, iP, jP);
-                        testCheck.updateAttackBoard(board);
-                        if(check){
-                            if(testCheck.testCheck(board, !board[i][j].color)){
-                                changePiece(board, iP, jP, i, j);
-                                testCheck.updateAttackBoard(board);
-                                cout << "You must not stay in check!" << endl;
-                                return false;
-                            }
-                        }
-                        return true;
-                    }
-                }
-                else{ //to the left
-                    for(k = iP - 1; k > i && !control; k--){ //loop until reach the piece clicked
-                        if(board[k][j].type != BLANK){ //test if all the pieces between the two are blank
-                            control = true; //stop the loop
-                        }
-                    }
-                    if(!control){ //if they are, the piece can be captured
-                        changePiece(board, i, j, iP, jP);
-                        testCheck.updateAttackBoard(board);
-                        if(check){
-                            if(testCheck.testCheck(board, !board[i][j].color)){
-                                changePiece(board, iP, jP, i, j);
-                                testCheck.updateAttackBoard(board);
-                                cout << "You must not stay in check!" << endl;
-                                return false;
-                            }
-                        }
-                        return true;
-                    }
-                }
-
-            }
-            control = false;
-            if(abs(i - iP) == abs(j - jP)){ //if the difference is the same, they are on the same diagonal
-                if(i > iP){ // front
-                    if(j > jP){ //front-right
-                        for(k = iP + 1, p = jP + 1; k < i && p < j && !control ; k++, p++){
-                            if(board[k][p].type != BLANK){ //test if all the pieces between the two are blank
-                                control = true; //stop the loop
-                            }
-                        }
-                        if(!control){ //if they are, the piece can be captured
-                            changePiece(board, i, j, iP, jP);
-                            testCheck.updateAttackBoard(board);
-                            if(check){
-                                if(testCheck.testCheck(board, !board[i][j].color)){
-                                    changePiece(board, iP, jP, i, j);
-                                    testCheck.updateAttackBoard(board);
-                                    cout << "You must not stay in check!" << endl;
-                                    return false;
-                                }
-                            }
-                            return true;
-                        }
-                    }
-                    else{ //front-left
-                        for(k = iP + 1, p = jP - 1; k < i && p > j && !control ; k++, p--){
-                            if(board[k][p].type != BLANK){ //test if all the pieces between the two are blank
-                                control = true; //stop the loop
-                            }
-                        }
-                        if(!control){ //if they are, the piece can be captured
-                            changePiece(board, i, j, iP, jP);
-                            testCheck.updateAttackBoard(board);
-                            if(check){
-                                if(testCheck.testCheck(board, !board[i][j].color)){
-                                    changePiece(board, iP, jP, i, j);
-                                    testCheck.updateAttackBoard(board);
-                                    cout << "You must not stay in check!" << endl;
-                                    return false;
-                                }
-                            }
-                            return true;
-                        }
-                    }
-                }
-                else{ //back
-                    if(j > jP){ //back-right
-                        for(k = iP - 1, p = jP + 1; k > i && p < j && !control ; k--, p++){
-                            if(board[k][p].type != BLANK){ //test if all the pieces between the two are blank
-                                control = true; //stop the loop
-                            }
-                        }
-                        if(!control){ //if they are, the piece can be captured
-                            changePiece(board, i, j, iP, jP);
-                            if(check){
-                                testCheck.updateAttackBoard(board);
-                                if(testCheck.testCheck(board, !board[i][j].color)){
-                                    changePiece(board, iP, jP, i, j);
-                                    testCheck.updateAttackBoard(board);
-                                    cout << "You must not stay in check!" << endl;
-                                    return false;
-                                }
-                            }
-                            return true;
-                        }
-                    }
-                    else{ //back-left
-                        for(k = iP - 1, p = jP - 1; k > i && p > j && !control ; k--, p--){
-                            if(board[k][p].type != BLANK){ //test if all the pieces between the two are blank
-                                control = true; //stop the loop
-                            }
-                        }
-                        if(!control){ //if they are, the piece can be captured
-                            changePiece(board, i, j, iP, jP);
-                            if(check){
-                                testCheck.updateAttackBoard(board);
-                                if(testCheck.testCheck(board, !board[i][j].color)){
-                                    changePiece(board, iP, jP, i, j);
-                                    testCheck.updateAttackBoard(board);
-                                    cout << "You must not stay in check!" << endl;
-                                    return false;
-                                }
-                            }
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
-        break;
-        case KING:
-            if(    ((i == iP + 1) && (j == jP + 1 || j == jP - 1 || j == jP))
-                || ((i == iP - 1) && (j == jP + 1 || j == jP - 1 || j == jP))
-                || ((i == iP)     && (j == jP + 1 || j == jP - 1)          )){ //right or left
+            moves++;
+            return true;
+        }
+        if(iP == 4 && i == iP + 1){
+            if(jP > 0 && j == jP - 1 && board[iP][jP-1].color == 0 && board[iP][jP-1].moves == 1 && board[iP][jP-1].type == PAWN){
                 changePiece(board, i, j, iP, jP);
-                if(check){
+                testCheck.updateAttackBoard(board);
+                if(testCheck.testCheck(board, !board[i][j].color)){
+                    changeBack(board, i, j, iP, jP);
+                    testCheck.updateAttackBoard(board);
+                    cout << "You must not stay in check!" << endl;
+                    return false;
+                }
+                board[iP][jP-1].color = -1;
+                board[iP][jP-1].code = "";
+                board[iP][jP-1].type = BLANK;
+                return true;
+            }
+            else if(jP < 7 && j == jP + 1 && board[iP][jP+1].color == 0 && board[iP][jP+1].moves == 1 && board[iP][jP+1].type == PAWN){ //En Passant
+                changePiece(board, i, j, iP, jP);
+                testCheck.updateAttackBoard(board);
+                if(testCheck.testCheck(board, !board[i][j].color)){
+                    changeBack(board, i, j, iP, jP);
+                    testCheck.updateAttackBoard(board);
+                    cout << "You must not stay in check!" << endl;
+                    return false;
+                }
+                board[iP][jP+1].color = -1;
+                board[iP][jP+1].type = BLANK;
+                return true;
+            }
+        }
+
+        return false;
+    }
+    else{
+        if((i == iP - 1 && j == jP) || (iP == 6 && i == iP - 2 && j == jP)){
+            changePiece(board, i, j, iP, jP);
+            testCheck.updateAttackBoard(board);
+            if(testCheck.testCheck(board, !board[i][j].color)){
+                changeBack(board, i, j, iP, jP);
+                testCheck.updateAttackBoard(board);
+                cout << "You must not stay in check!" << endl;
+                return false;
+            }
+            moves++;
+            return true;
+        }
+        if(iP == 3 && i == iP - 1 ){
+            if(jP > 0 && j == jP - 1 && board[iP][jP-1].color == 0 && board[iP][jP-1].moves == 1 && board[iP][jP-1].type == PAWN){
+                changePiece(board, i, j, iP, jP);
+                testCheck.updateAttackBoard(board);
+                if(testCheck.testCheck(board, !board[i][j].color)){
+                    changeBack(board, i, j, iP, jP);
+                    testCheck.updateAttackBoard(board);
+                    cout << "You must not stay in check!" << endl;
+                    return false;
+                }
+                board[iP][jP-1].color = -1;
+                board[iP][jP-1].type = BLANK;
+                return true;
+            }
+            else if(jP < 7 && j == jP + 1 && board[iP][jP+1].color == 0 && board[iP][jP+1].moves == 1 && board[iP][jP+1].type == PAWN){ //En Passant
+                changePiece(board, i, j, iP, jP);
+                testCheck.updateAttackBoard(board);
+                if(testCheck.testCheck(board, !board[i][j].color)){
+                    changeBack(board, i, j, iP, jP);
+                    testCheck.updateAttackBoard(board);
+                    cout << "You must not stay in check!" << endl;
+                    return false;
+                }
+                board[iP][jP+1].color = -1;
+                board[iP][jP+1].type = BLANK;
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
+bool Piece::towerMovement(Piece board[8][8], int i, int j, int iP, int jP, bool check){
+    bool control = false;
+    int k;
+    if(i == iP){ //same row
+        if(j > jP){ //to the right
+            for(k = jP + 1; k < j && !control; k++){ //loop until reach the piece clicked
+                if(board[i][k].type != BLANK){ //test if all the pieces between the two are blank
+                    control = true; //stop the loop
+                }
+            }
+            if(!control){ //if they are, the piece can be captured
+                changePiece(board, i, j, iP, jP);
+                //if(check){
                     testCheck.updateAttackBoard(board);
                     if(testCheck.testCheck(board, !board[i][j].color)){
                         changeBack(board, i, j, iP, jP);
@@ -450,7 +157,220 @@ bool Piece::movement(Piece board[8][8], int i, int j, int iP, int jP, bool check
                         cout << "You must not stay in check!" << endl;
                         return false;
                     }
+                //}
+                return true;
+            }
+        }
+        else{ //to the left
+            for(k = jP - 1; k > j && !control; k--){ //loop until reach the piece clicked
+                if(board[i][k].type != BLANK){ //test if all the pieces between the two are blank
+                    control = true; //stop the loop
                 }
+            }
+            if(!control){ //if they are, the piece can be captured
+                changePiece(board, i, j, iP, jP);
+              //  if(check){
+                    testCheck.updateAttackBoard(board);
+                    if(testCheck.testCheck(board, !board[i][j].color)){
+                        changeBack(board, i, j, iP, jP);
+                        testCheck.updateAttackBoard(board);
+                        cout << "You must not stay in check!" << endl;
+                        return false;
+                    }
+              //  }
+                return true;
+            }
+        }
+    }
+    else if(j == jP){ //same column
+        if(i > iP){ //to the front
+            for(k = iP + 1; k < i && !control; k++){ //loop until reach the piece clicked
+                if(board[k][j].type != BLANK){ //test if all the pieces between the two are blank
+                    control = true; //stop the loop
+                }
+            }
+            if(!control){ //if they are, the piece can be captured
+                changePiece(board, i, j, iP, jP);
+              //  if(check){
+                    testCheck.updateAttackBoard(board);
+                    if(testCheck.testCheck(board, !board[i][j].color)){
+                        changeBack(board, i, j, iP, jP);
+                        testCheck.updateAttackBoard(board);
+                        cout << "You must not stay in check!" << endl;
+                        return false;
+                    }
+             //   }
+                return true;
+            }
+        }
+        else{ //to the left
+            for(k = iP - 1; k > i && !control; k--){ //loop until reach the piece clicked
+                if(board[k][j].type != BLANK){ //test if all the pieces between the two are blank
+                    control = true; //stop the loop
+                }
+            }
+            if(!control){ //if they are, the piece can be captured
+                changePiece(board, i, j, iP, jP);
+             //   if(check){
+                    testCheck.updateAttackBoard(board);
+                    if(testCheck.testCheck(board, !board[i][j].color)){
+                        changeBack(board, i, j, iP, jP);
+                        testCheck.updateAttackBoard(board);
+                        cout << "You must not stay in check!" << endl;
+                        return false;
+                    }
+              //  }
+                return true;
+            }
+        }
+
+    }
+    return false;
+}
+
+bool Piece::bishopMovement(Piece board[8][8], int i, int j, int iP, int jP, bool check){
+    bool control = false;
+    int k, p;
+    if(abs(i - iP) == abs(j - jP)){ //if the difference is the same, they are on the same diagonal
+        if(i > iP){ // front
+            if(j > jP){ //front-right
+                for(k = iP + 1, p = jP + 1; k < i && p < j && !control ; k++, p++){
+                    if(board[k][p].type != BLANK){ //test if all the pieces between the two are blank
+                        control = true; //stop the loop
+                    }
+                }
+                if(!control){ //if they are, the piece can be captured
+                    changePiece(board, i, j, iP, jP);
+                    testCheck.updateAttackBoard(board);
+                 //   if(check){
+                        if(testCheck.testCheck(board, !board[i][j].color)){
+                            changeBack(board, i, j, iP, jP);
+                            testCheck.updateAttackBoard(board);
+                            cout << "You must not stay in check!" << endl;
+                            return false;
+                        }
+                    //}
+                    return true;
+                }
+            }
+            else{ //front-left
+                for(k = iP + 1, p = jP - 1; k < i && p > j && !control ; k++, p--){
+                    if(board[k][p].type != BLANK){ //test if all the pieces between the two are blank
+                        control = true; //stop the loop
+                    }
+                }
+                if(!control){ //if they are, the piece can be captured
+                    changePiece(board, i, j, iP, jP);
+                    testCheck.updateAttackBoard(board);
+                  //  if(check){
+                        if(testCheck.testCheck(board, !board[i][j].color)){
+                            changeBack(board, i, j, iP, jP);
+                            testCheck.updateAttackBoard(board);
+                            cout << "You must not stay in check!" << endl;
+                            return false;
+                        }
+                 //   }
+                    return true;
+                }
+            }
+        }
+        else{ //back
+            if(j > jP){ //back-right
+                for(k = iP - 1, p = jP + 1; k > i && p < j && !control ; k--, p++){
+                    if(board[k][p].type != BLANK){ //test if all the pieces between the two are blank
+                        control = true; //stop the loop
+                    }
+                }
+                if(!control){ //if they are, the piece can be captured
+                    changePiece(board, i, j, iP, jP);
+                    testCheck.updateAttackBoard(board);
+                 //   if(check){
+                        if(testCheck.testCheck(board, !board[i][j].color)){
+                            changeBack(board, i, j, iP, jP);
+                            testCheck.updateAttackBoard(board);
+                            cout << "You must not stay in check!" << endl;
+                            return false;
+                        }
+                   // }
+                    return true;
+                }
+            }
+            else{ //back-left
+                for(k = iP - 1, p = jP - 1; k > i && p > j && !control ; k--, p--){
+                    if(board[k][p].type != BLANK){ //test if all the pieces between the two are blank
+                        control = true; //stop the loop
+                    }
+                }
+                if(!control){ //if they are, the piece can be captured
+                    changePiece(board, i, j, iP, jP);
+                    testCheck.updateAttackBoard(board);
+                //    if(check){
+                        if(testCheck.testCheck(board, !board[i][j].color)){
+                            changeBack(board, i, j, iP, jP);
+                            testCheck.updateAttackBoard(board);
+                            cout << "You must not stay in check!" << endl;
+                            return false;
+                        }
+                 //   }
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+bool Piece::knightMovement(Piece board[8][8], int i, int j, int iP, int jP, bool check){
+if(   (i == iP + 1 && j == jP + 2) || (i == iP + 2 && j == jP + 1)
+   || (i == iP + 1 && j == jP - 2) || (i == iP + 2 && j == jP - 1)
+   || (i == iP - 1 && j == jP + 2) || (i == iP - 2 && j == jP + 1)
+   || (i == iP - 1 && j == jP - 2) || (i == iP - 2 && j == jP - 1)){
+    changePiece(board, i, j, iP, jP);
+    testCheck.updateAttackBoard(board);
+    if(testCheck.testCheck(board, !board[i][j].color)){
+        changeBack(board, i, j, iP, jP);
+        testCheck.updateAttackBoard(board);
+        cout << "You must not stay in check!" << endl;
+        return false;
+    }
+    return true;
+}
+return false;
+}
+
+bool Piece::movement(Piece board[8][8], int i, int j, int iP, int jP, bool check){ //iP and jP = piece clicked. i and j = current square clicked.
+    bool control = false; //control loops
+    int k, p;
+    switch(board[iP][jP].type){
+        case PAWN:
+            return pawnMovement(board, i, j, iP, jP, check);
+        break;
+        case TOWER:
+            return towerMovement(board, i, j, iP, jP, check);
+        break;
+        case BISHOP:
+            return bishopMovement(board, i, j, iP, jP, check);
+        break;
+        case KNIGHT:
+            return knightMovement(board, i, j, iP, jP, check);
+        break;
+        case QUEEN:
+            return (towerMovement(board, i, j, iP, jP, check) || bishopMovement(board, i, j, iP, jP, check));
+        break;
+        case KING:
+            if(    ((i == iP + 1) && (j == jP + 1 || j == jP - 1 || j == jP))
+                || ((i == iP - 1) && (j == jP + 1 || j == jP - 1 || j == jP))
+                || ((i == iP)     && (j == jP + 1 || j == jP - 1)          )){ //right or left
+                changePiece(board, i, j, iP, jP);
+               // if(check){
+                    testCheck.updateAttackBoard(board);
+                    if(testCheck.testCheck(board, !board[i][j].color)){
+                        changeBack(board, i, j, iP, jP);
+                        testCheck.updateAttackBoard(board);
+                        cout << "You must not get or stay in check!" << endl;
+                        return false;
+                    }
+              //  }
                 return true;
             }
             else if(i == iP && j == jP + 2){
@@ -474,25 +394,6 @@ bool Piece::movement(Piece board[8][8], int i, int j, int iP, int jP, bool check
                     testCheck.updateAttackBoard(board);
                     return true;
                 }
-            }
-            return false;
-        break;
-        case KNIGHT:
-            if(   (i == iP + 1 && j == jP + 2) || (i == iP + 2 && j == jP + 1)
-               || (i == iP + 1 && j == jP - 2) || (i == iP + 2 && j == jP - 1)
-               || (i == iP - 1 && j == jP + 2) || (i == iP - 2 && j == jP + 1)
-               || (i == iP - 1 && j == jP - 2) || (i == iP - 2 && j == jP - 1)){
-                changePiece(board, i, j, iP, jP);
-                if(check){
-                    testCheck.updateAttackBoard(board);
-                    if(testCheck.testCheck(board, !board[i][j].color)){
-                        changePiece(board, iP, jP, i, j);
-                        testCheck.updateAttackBoard(board);
-                        cout << "You must not stay in check!" << endl;
-                        return false;
-                    }
-                }
-                return true;
             }
             return false;
         break;
@@ -552,18 +453,17 @@ bool Piece::capture(Piece board[8][8], int i, int j, int iP, int jP, bool check)
             if(board[iP][jP].color == 1){
                if( ( (i == iP+1 && j == jP+1) || (i == iP+1 && j == jP-1) )){ //The piece clicked is in red mens you can capture it
                     changePiece(board, i, j, iP, jP);
-                    if(check){
+                    testCheck.updateAttackBoard(board);
+                    if(testCheck.testCheck(board, !board[i][j].color)){
+                        changeBack(board, i, j, iP, jP);
                         testCheck.updateAttackBoard(board);
-                        if(testCheck.testCheck(board, !board[i][j].color)){
-                            changePiece(board, iP, jP, i, j);
-                            testCheck.updateAttackBoard(board);
-                            cout << "You must not stay in check!" << endl;
-                            return false;
-                        }
+                        cout << "You must not stay in check!" << endl;
+                        return false;
                     }
                     return true;
                 }
-            return false;
+
+                return false;
             }
             else{
                 if( ( (i == iP-1 && j == jP+1) || (i == iP-1 && j == jP-1) )){ //The piece clicked is in red mens you can capture it
@@ -571,7 +471,7 @@ bool Piece::capture(Piece board[8][8], int i, int j, int iP, int jP, bool check)
                     if(check){
                         testCheck.updateAttackBoard(board);
                         if(testCheck.testCheck(board, !board[i][j].color)){
-                            changePiece(board, iP, jP, i, j);
+                            changeBack(board, i, j, iP, jP);
                             testCheck.updateAttackBoard(board);
                             cout << "You must not stay in check!" << endl;
                             return false;
@@ -587,6 +487,9 @@ bool Piece::capture(Piece board[8][8], int i, int j, int iP, int jP, bool check)
         break;
     }
 }
+
+
+
 Piece::Piece(){
     sf::RectangleShape shape(sf::Vector2f(PIECE_SIZE, PIECE_SIZE));
     this->square = shape;
@@ -609,6 +512,7 @@ Piece::Piece(TYPE tipo){
     this->border.setTexture(*border);
     this->type = tipo;
     hasMoved = false;
+    moves = 0;
     switch(tipo){
         case PAWN:
             this->code = "";

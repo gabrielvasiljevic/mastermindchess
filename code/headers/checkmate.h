@@ -23,9 +23,11 @@ class CheckMate{
         bool testBlockQueen(Piece pieces[8][8], int iQueen, int jQueen, int iKing, int jKing);
         bool testBlockTower(Piece pieces[8][8], int iTower, int jTower, int iKing, int jKing);
         bool testBlockBishop(Piece pieces[8][8], int iBishop, int jBishop, int iKing, int jKing);
+        bool testIfStillInCheck(Piece pieces[8][8], int i, int j, int iX, int iY);
         bool testCaptureMove(Piece pieces[8][8], int iKing, int jKing);
         bool testCapture(Piece pieces[8][8], int iX, int jX);
         bool testKingAttack(Piece piece, int iKing, int jKing);
+
 };
 
 

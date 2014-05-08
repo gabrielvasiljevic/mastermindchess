@@ -16,12 +16,17 @@ class Piece{
         bool highlighted;
         bool hasMoved;
         bool movement(Piece board[8][8], int i, int j, int iP, int jP, bool check);
+        bool pawnMovement(Piece board[8][8], int i, int j, int iP, int jP, bool check);
+        bool towerMovement(Piece board[8][8], int i, int j, int iP, int jP, bool check);
+        bool bishopMovement(Piece board[8][8], int i, int j, int iP, int jP, bool check);
+        bool knightMovement(Piece board[8][8], int i, int j, int iP, int jP, bool check);
         bool capture(Piece board[8][8], int i, int j, int iP, int jP, bool check);
         void changePiece(Piece board[8][8], int i, int j, int iP, int jP);
         void changeBack(Piece board[8][8], int i, int j, int iP, int jP);
         bool testSmallCastling(Piece board[8][8], int i, int j, int iP, int jP);
         bool testBigCastling(Piece board[8][8], int i, int j, int iP, int jP);
         int color; //The color of the piece: black or white
+        int moves;
         int attackBoard[8][8];
         std::string code;
         sf::RectangleShape square; //The geometric figure that define the shape of the piece

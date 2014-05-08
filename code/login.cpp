@@ -4,6 +4,8 @@
 #include <string>
 #include <fstream>
 
+#define VERSION "0.1.5"
+
 std::string secretPass = "";
 std::string configBuffer;
 int port;
@@ -14,6 +16,7 @@ using namespace std;
 Login::Login(sf::RenderWindow& window, NetworkHandler& network):
                                         mainWindow(window), //x, y, size x, size y, title, text x, text y
                                         network(network),
+                                        _register(window, network),
                                         userInputBox(400, 300, 150, 25, "Login", 460, 270),
                                         passwordInputBox(400, 370, 150, 25, "Password", 445, 340),
                                         serverInputBox(375, 440, 200, 25, "Server", 454, 410),
@@ -37,7 +40,7 @@ void Login::run(STATE& state){
     while (mainWindow.isOpen() && state == STATE::Login){
         sf::Event event;
         while (mainWindow.pollEvent(event)){
-            handleEvent(event);
+            handleEvent(event, state);
         }
         receive = network.receive();
         switch(receive){
@@ -48,12 +51,17 @@ void Login::run(STATE& state){
                 }
                 else cout << "Incorrect login..." << endl;
             break;
+            case packetID::WrongVersion:
+                cout << "You have an outdated version of the game. Please download the latest version." << endl;
+            break;
         }
         mainWindow.clear(sf::Color(0, 150, 255));
         //window.clear(sf::Color(0, 0, 0));
         draw();
         mainWindow.display();
-
+    }
+    if(state == STATE::Register){
+        _register.run(state);
     }
 }
 
@@ -79,7 +87,7 @@ void Login::draw(){
     mainWindow.draw(registerButton.text);
 }
 
-void Login::handleEvent(const sf::Event& event){
+void Login::handleEvent(const sf::Event& event, STATE& state){
     char letter;
     switch(event.type){
         case sf::Event::Closed:
@@ -155,6 +163,9 @@ void Login::handleEvent(const sf::Event& event){
             else if(loginButton.clicked(x, y)){
                 tryToConnect();
             }
+            else if(registerButton.clicked(x, y)){
+                state = STATE::Register;
+            }
         break;
 
     }
@@ -169,7 +180,7 @@ void Login::tryToConnect(){
             bool response = false, Color = false;
             string answer;
 
-            network.sendLogin(userBuffer, passwordBuffer);
+            network.sendLogin(userBuffer, passwordBuffer, VERSION);
             cout << "Please wait..." << endl;
         }
         else

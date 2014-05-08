@@ -3,7 +3,7 @@
 #include "Pieces.h"
 
 #define BOARD_X 250 //position of the board
-#define BOARD_Y 130
+#define BOARD_Y 100
 
 class Board{
     public:

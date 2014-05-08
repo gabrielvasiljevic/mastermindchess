@@ -2,6 +2,7 @@
 #define _LOGIN
 #include "inputBox.h"
 #include "button.h"
+#include "register.h"
 #include "networkHandler.h"
 #include "dataTypes.h"
 
@@ -18,10 +19,11 @@ class Login{
         sf::Texture* backgroundTexture;
         sf::RenderWindow &mainWindow;
         NetworkHandler &network;
+        Register _register;
         std::string userBuffer;
         std::string passwordBuffer;
         std::string serverBuffer;
-        void handleEvent(const sf::Event& event);
+        void handleEvent(const sf::Event& event, STATE& state);
         void draw();
         void tryToConnect();
         void waitForGame();

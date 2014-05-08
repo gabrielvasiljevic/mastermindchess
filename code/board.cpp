@@ -14,6 +14,7 @@ Board::Board(int board_x, int board_y, int color){
 
 //Changing a single number in this code will destroy the entire game. Be careful!
 
+
 void Board::Initialize(int board_x, int board_y){
     Piece pawns(PAWN);
     Piece towers(TOWER);
@@ -272,6 +273,18 @@ void Board::Highlight(TYPE t, int i, int j){
                             this->pieces[i+1][j-1].square.setFillColor(sf::Color::Red);
                         }
                     }
+                    if(i == 4){ //en passant
+                        if(j > 0){
+                            if(this->pieces[i+1][j-1].type == BLANK && this->pieces[i][j-1].color == 0 && this->pieces[i][j-1].type == PAWN && this->pieces[i][j-1].moves == 1){
+                                this->pieces[i+1][j-1].square.setFillColor(sf::Color::Red);
+                            }
+                        }
+                        if(j < 7){
+                            if(this->pieces[i+1][j+1].type == BLANK && this->pieces[i][j+1].color == 0 && this->pieces[i][j+1].type == PAWN && this->pieces[i][j+1].moves == 1){
+                                this->pieces[i+1][j+1].square.setFillColor(sf::Color::Red);
+                            }
+                        }
+                    }
                 }
             }
             else{
@@ -299,6 +312,18 @@ void Board::Highlight(TYPE t, int i, int j){
                     if(j == 7){
                         if(this->pieces[i-1][j-1].type != BLANK && this->pieces[i-1][j-1].color != this->pieces[i][j].color){
                             this->pieces[i-1][j-1].square.setFillColor(sf::Color::Red);
+                        }
+                    }
+                    if(i == 3){ //en passant
+                        if(j > 0){
+                            if(this->pieces[i-1][j-1].type == BLANK && this->pieces[i][j-1].color == 0 && this->pieces[i][j-1].type == PAWN && this->pieces[i][j-1].moves == 1){
+                                this->pieces[i-1][j-1].square.setFillColor(sf::Color::Red);
+                            }
+                        }
+                        if(j < 7){
+                            if(this->pieces[i-1][j+1].type == BLANK && this->pieces[i][j+1].color == 0 && this->pieces[i][j+1].type == PAWN && this->pieces[i][j+1].moves == 1){
+                                this->pieces[i-1][j+1].square.setFillColor(sf::Color::Red);
+                            }
                         }
                     }
                 }
