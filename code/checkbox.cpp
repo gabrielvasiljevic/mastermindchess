@@ -9,10 +9,10 @@ Checkbox::Checkbox(int x, int y, int size_x, int size_y, std::string desc) : Int
 
     this->font.loadFromFile("media/fonts/AGENCYB.TTF");
     this->text.setFont(this->font);
-    this->text.setPosition(x + size_x + 5, y - 6);
+    this->text.setPosition(x + 5, y - 6); //+size_x
     this->text.setString(desc);
     this->text.setCharacterSize(20U);
-  //  this->description.setColor(sf::Color::Black);
+    this->text.setColor(sf::Color::Black);
 }
 
 void Checkbox::action(){
@@ -29,3 +29,24 @@ void Checkbox::action(){
     checked = !checked;
 
 }
+
+void Checkbox::unmark(){
+    if(checked){
+        delete this->texture;
+        this->texture = new sf::Texture();
+        this->texture->loadFromFile("media/images/checkbox.png");
+        this->image.setTexture(*this->texture);
+        checked = false;
+    }
+}
+
+void Checkbox::mark(){
+    if(!checked){
+        delete this->texture;
+        this->texture = new sf::Texture();
+        this->texture->loadFromFile("media/images/marked.png");
+        this->image.setTexture(*this->texture);
+        checked = true;
+    }
+}
+

@@ -9,10 +9,12 @@ class Gameover{
     public:
         sf::Sprite background;
         sf::Texture* backgroundTexture;
+
         sf::Text warnings;
+        sf::Text eloDiff;
+        sf::Text matchDuration;
         sf::Font warningFont;
         sf::RenderWindow &mainWindow;
-        NetworkHandler &network;
         Button backButton;
         Button saveHistoryButton;
         void handleEvent(const sf::Event& event, STATE& state);
@@ -20,7 +22,10 @@ class Gameover{
         void keepConnectionAlive();
         void run(STATE& state);
         void setWinner(int winner);
-        Gameover(sf::RenderWindow& window, NetworkHandler& network);
+        void setEloDifferente(int myElo, int enemyElo, int result);
+        void setMatchDuration(int gameTime, int myTime, int enemyTime);
+        int calculateELO(int Ra, int Rb, double Sa);
+        Gameover(sf::RenderWindow& window);
 };
 
 

@@ -4,6 +4,10 @@
 #include "button.h"
 #include "networkHandler.h"
 #include "dataTypes.h"
+#include "configurationDAO.h"
+
+
+
 
 class Register{
     public:
@@ -14,25 +18,30 @@ class Register{
         inputBox passwordConfirmInputBox;
         inputBox nicknameInputBox;
         inputBox emailInputBox;
+        inputBox serverInputBox;
+
         Button cancelButton;
         Button registerButton;
         sf::Sprite background;
         sf::Texture* backgroundTexture;
         sf::RenderWindow &mainWindow;
-        NetworkHandler &network;
+
         std::string usernameBuffer;
         std::string passwordBuffer;
         std::string passwordConfirmBuffer;
         std::string nicknameBuffer;
         std::string emailBuffer;
+        std::string serverBuffer;
         std::string secretPass;
         std::string secretPassConfirm;
+
         void handleEvent(const sf::Event& event, STATE& state);
         void draw();
+        void selectBox();
         void tryToRegister();
         void waitForGame();
         void run(STATE& state);
-        Register(sf::RenderWindow& window, NetworkHandler& network);
+        Register(sf::RenderWindow& window);
 };
 
 #endif // _REGISTER

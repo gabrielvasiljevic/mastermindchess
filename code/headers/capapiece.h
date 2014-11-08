@@ -5,16 +5,22 @@
 //A piece can be a regular chess piece, or a blank square
 enum CAPATYPE {CAPABLANK, CAPAPAWN, CAPAKNIGHT, CAPABISHOP, CAPATOWER, CAPAQUEEN, CAPAKING, ARCHBISHOP, CHANCELER};
 
-#define PIECE_SIZE 55
+#define PIECE_SIZE 64
 
 class capapiece{
     public:
         CAPATYPE type;
+        int gametype;
+        int columns;
         sf::Sprite image; //The image of the piece itself
         sf::Sprite border;
+        sf::Sprite grayborder;
+
         bool clicked; //To check if the piece was clicked
         bool highlighted;
+        bool selected;
         bool hasMoved;
+
         bool movement(capapiece board[8][10], int i, int j, int iP, int jP, bool check);
         bool pawnMovement(capapiece board[8][10], int i, int j, int iP, int jP, bool check);
         bool towerMovement(capapiece board[8][10], int i, int j, int iP, int jP, bool check);

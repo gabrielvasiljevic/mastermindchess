@@ -3,7 +3,7 @@
 #include "capapiece.h"
 
 #define CBOARD_X 195 //position of the board
-#define CBOARD_Y 100
+#define CBOARD_Y 90
 
 class Capaboard{
     public:

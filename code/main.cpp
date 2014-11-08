@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 
+
 #include "headers/board.h"
 #include "headers/checkbox.h"
 #include "headers/game.h"
@@ -12,66 +13,43 @@
 #include "headers/login.h"
 #include "headers/lobby.h"
 #include "headers/dataTypes.h"
-
+#include "headers/gesturalModule.h"
 
 using namespace std;
 using namespace sf;
 
-
-//220, 100
+sf::RenderWindow window(sf::VideoMode(933, 700), "MasterMind Chess", sf::Style::Close);
 
 STATE state = STATE::Login;
 
-string VERSION = "0.1.5";
-
-Packet packet;
+//Packet packet;
 
 TcpSocket server;
-//int port = 14193;
-//string ip = "127.0.0.1";
+
 string ip;
 int enemyID = -1;
-int i;
-int j;
 int optColor = 1;
 bool check;
 sf::Text temporary;
 sf::Font tempfont;
-//string username, password;
 
-/*
-void Highlight(Piece b[8][8], TYPE t, int i, int j);
-void HighlightTower(Piece b[8][8], int i, int j);
-void HighlightBishop(Piece b[8][8], int i, int j);
-void Unhighlight(Piece b[8][8]);
-void Initialize_Texture(Piece b[8][8]);
-*/
+void loadTextures();
 
 
 int main(){
-    sf::RenderWindow window(sf::VideoMode(933, 700), "MasterMind Chess", sf::Style::Close);
-    sf::Image icon;
-    icon.loadFromFile("media/images/Icon.png");
-    window.setIcon(256, 256, icon.getPixelsPtr());
-    NetworkHandler network;
 
-    tempfont.loadFromFile("media/fonts/AGENCYB.TTF");
-    temporary.setFont(tempfont);
-    temporary.setPosition(420, 360);
-    temporary.setString("Waiting for another player...");
-    temporary.setCharacterSize(20U);
-    Login login(window, network);
-    Lobby lobby(window, network);
-    Game game(window, network, 1);
+    sf::Image icon;
+    icon.loadFromFile("media/images/icons/knightIcon.png");
+    window.setIcon(256, 256, icon.getPixelsPtr());
+    gesturalModule.connectToApplication();
+    loadTextures();
+    Login login(window);
+    Lobby lobby(window);
+    //Game game(window, 1, 1);
+
+    //while (gesturalModule.listener.listen (14293) != Socket::Done);
+
     while (window.isOpen()){
-        switch(network.receive()){
-            case packetID::Options:
-                optColor = 0;
-                state = STATE::Game;
-                game.myColor = 0;
-                game.b.InitializeBlack(BOARD_X, BOARD_Y);
-            break;
-        }
         sf::Event event;
         if(state == STATE::Login){
             login.run(state);
@@ -80,58 +58,91 @@ int main(){
         if(state == STATE::Lobby){
             lobby.run(state);
         }
-
-        /*if(state == STATE::Game){
-            game.Run(state);
-        }
-        while (window.pollEvent(event)){
-            switch(event.type){
-                case sf::Event::Closed:
-                    //network.sendDisconnect();
-                    window.close();
-                case sf::Event::MouseButtonPressed: //When the mouse button is clicked, check where it was
-                    if(state == STATE::Game){
-                    }
-
-                    break;
-                } //switch end
-
-        }//event while ends
-
-        /*Draw everything
-
-        window.clear(sf::Color(0, 150, 255));
-        //window.clear(sf::Color(0, 0, 0));
-        window.draw(temporary);
-        window.display();
-
-    }
-  /*
-
-
-    //Main loop
-
-    //game.myColor = myColor;
-    while (window.isOpen()){
-
-        network.handleEvents();
-
-
-
-        }
-        //Handle the events
-
-
-
-       /* if(game.moveCount%2 == 0){
-            network.sendMoveHistory(game.history.currentMove);
-        }
-        if(state == STATE::Game || state == STATE::GameOver){
-            game.draw();
-        }
-        else */
     }
     return 0;
 }
+
+    sf::Texture* Textures::blanks          = new sf::Texture();
+    sf::Texture* Textures::bronzeMedal     = new sf::Texture();
+    sf::Texture* Textures::silverMedal     = new sf::Texture();
+    sf::Texture* Textures::goldMedal       = new sf::Texture();
+    sf::Texture* Textures::bronzeTrophy    = new sf::Texture();
+    sf::Texture* Textures::silverTrophy    = new sf::Texture();
+    sf::Texture* Textures::goldTrophy      = new sf::Texture();
+    sf::Texture* Textures::inputBox        = new sf::Texture();
+    sf::Texture* Textures::largeInputBox   = new sf::Texture();
+    sf::Texture* Textures::loginBG         = new sf::Texture();
+    sf::Texture* Textures::invitationPaper = new sf::Texture();
+
+    sf::Texture* Textures::classicPaper    = new sf::Texture();
+    sf::Texture* Textures::fischerPaper    = new sf::Texture();
+    sf::Texture* Textures::capaPaper       = new sf::Texture();
+    sf::Texture* Textures::chatPaper       = new sf::Texture();
+
+    sf::Texture* Textures::blueMatch    = new sf::Texture();
+    sf::Texture* Textures::yellowMatch    = new sf::Texture();
+    sf::Texture* Textures::redMatch       = new sf::Texture();
+    sf::Texture* Textures::whiteMatch       = new sf::Texture();
+
+    sf::Texture* Textures::water5       = new sf::Texture();
+    sf::Texture* Textures::water15      = new sf::Texture();
+    sf::Texture* Textures::water30      = new sf::Texture();
+
+    sf::Texture* Textures::classic5icon       = new sf::Texture();
+    sf::Texture* Textures::classic15icon      = new sf::Texture();
+    sf::Texture* Textures::classic30icon      = new sf::Texture();
+
+    sf::Texture* Textures::fischer5icon       = new sf::Texture();
+    sf::Texture* Textures::fischer15icon      = new sf::Texture();
+    sf::Texture* Textures::fischer30icon      = new sf::Texture();
+
+
+    sf::Texture* Textures::capa5icon       = new sf::Texture();
+    sf::Texture* Textures::capa15icon      = new sf::Texture();
+    sf::Texture* Textures::capa30icon      = new sf::Texture();
+
+void loadTextures(){
+        Textures::bronzeMedal->loadFromFile("media/images/prizes/bronzeMedalS.png");
+        Textures::bronzeTrophy->loadFromFile("media/images/prizes/bronzeTrophyS.png");
+
+        Textures::silverMedal->loadFromFile("media/images/prizes/silverMedalS.png");
+        Textures::silverTrophy->loadFromFile("media/images/prizes/silverTrophyS.png");
+
+        Textures::goldMedal->loadFromFile("media/images/prizes/goldMedalS.png");
+        Textures::goldTrophy->loadFromFile("media/images/prizes/goldTrophyS.png");
+
+        Textures::inputBox->loadFromFile("media/images/inputBG.png");
+        Textures::largeInputBox->loadFromFile("media/images/largeInputBG.png");
+        Textures::loginBG->loadFromFile("media/images/loginBG.png");
+        Textures::invitationPaper->loadFromFile("media/images/invitePaper.png");
+
+        Textures::classicPaper->loadFromFile("media/images/papers/bluepaper.png");
+        Textures::fischerPaper->loadFromFile("media/images/papers/yellowpaper.png");
+        Textures::capaPaper->loadFromFile("media/images/papers/redpaper.png");
+        Textures::chatPaper->loadFromFile("media/images/papers/chatpaper.png");
+
+        Textures::blueMatch->loadFromFile("media/images/bluematch.png");
+        Textures::yellowMatch->loadFromFile("media/images/yellowmatch.png");
+        Textures::redMatch->loadFromFile("media/images/redmatch.png");
+        Textures::whiteMatch->loadFromFile("media/images/whitematch.png");
+
+        Textures::water5->loadFromFile("media/images/watermarks/water5.png");
+        Textures::water15->loadFromFile("media/images/watermarks/water15.png");
+        Textures::water30->loadFromFile("media/images/watermarks/water30.png");
+
+        Textures::classic5icon->loadFromFile("media/images/icons/classic5icon.png");
+        Textures::classic15icon->loadFromFile("media/images/icons/classic15icon.png");
+        Textures::classic30icon->loadFromFile("media/images/icons/classic30icon.png");
+
+        Textures::fischer5icon->loadFromFile("media/images/icons/fischer5icon.png");
+        Textures::fischer15icon->loadFromFile("media/images/icons/fischer15icon.png");
+        Textures::fischer30icon->loadFromFile("media/images/icons/fischer30icon.png");
+
+        Textures::capa5icon->loadFromFile("media/images/icons/capa5icon.png");
+        Textures::capa15icon->loadFromFile("media/images/icons/capa15icon.png");
+        Textures::capa30icon->loadFromFile("media/images/icons/capa30icon.png");
+
+}
+
 
 

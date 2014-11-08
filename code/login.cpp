@@ -1,38 +1,60 @@
 #include <SFML/Graphics.hpp>
 #include "headers/login.h"
+#include "headers/md5.h"
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <windows.h>
 
-#define VERSION "0.1.5"
 
-std::string secretPass = "";
-std::string configBuffer;
 int port;
+int console;
 int myColor = 1;
-bool waitingForGame = false;
+
 using namespace std;
 
-Login::Login(sf::RenderWindow& window, NetworkHandler& network):
+void centralize(sf::Text& text){
+    text.setPosition(470 - text.getGlobalBounds().width/2, text.getPosition().y);
+}
+
+Login::Login(sf::RenderWindow& window):
                                         mainWindow(window), //x, y, size x, size y, title, text x, text y
-                                        network(network),
-                                        _register(window, network),
-                                        userInputBox(400, 300, 150, 25, "Login", 460, 270),
-                                        passwordInputBox(400, 370, 150, 25, "Password", 445, 340),
-                                        serverInputBox(375, 440, 200, 25, "Server", 454, 410),
-                                        registerButton(370, 480, 100, 70, "Register", ButtonStyle::Dark),
-                                        loginButton(480, 480, 100, 70, "Login", ButtonStyle::Dark){
-    ifstream config {"config.dat"};
+                                        _register(window),
+                                        userInputBox(400, 300, 150, 25, "Login", 460, 270, 0),
+                                        passwordInputBox(400, 370, 150, 25, "Password", 445, 340, 0),
+                                        serverInputBox(375, 440, 200, 34, "Server", 454, 410, 2),
+                                        registerButton(370, 480, 100, 70, "", "registerButton", ButtonStyle::NoText),
+                                        loginButton(480, 480, 100, 45, "", "loginButton", ButtonStyle::NoText){
+    /*ifstream config {"config.dat"};
     if (config.is_open()){
         getline(config, serverBuffer, ';');
         config >> port;
+        config >> console;
+    }*/
+    serverBuffer = configurationDAO.getServer();
+    port = configurationDAO.getPort();
+    console = configurationDAO.getConsole();
+    if(!console){
+        FreeConsole();
     }
-    serverInputBox.inputText.setString(serverBuffer);
+    serverInputBox.inputText.setString(serverInputBox.getLastLetters(serverBuffer, 30));
 
+
+    this->font.loadFromFile("media/fonts/AGENCYB.TTF");
+    this->userAlert.setFont(this->font);
+    this->userAlert.setPosition(450, 610);
+    this->userAlert.setString("");
+    this->userAlert.setCharacterSize(20U);
+
+    userInputBox.select();
     this->backgroundTexture = new sf::Texture();
 
-    this->backgroundTexture->loadFromFile("media/images/bg1.jpg");
+    this->backgroundTexture->loadFromFile("media/images/bg2.jpg");
     this->background.setTexture(*this->backgroundTexture);
+
+    this->loginBG.setTexture(*Textures::loginBG);
+    this->loginBG.setPosition(350, 260);
+    this->secretPass = "";
 }
 
 void Login::run(STATE& state){
@@ -47,12 +69,20 @@ void Login::run(STATE& state){
             case packetID::LoginResponse:
                 if(network.receiveLoginResponse()){
                     cout << "Login successful!" << endl;
+                    configurationDAO.setServer(serverBuffer);
                     state = STATE::Lobby;
                 }
-                else cout << "Incorrect login..." << endl;
+                else{
+                    cout << "Incorrect login..." << endl;
+                    userAlert.setString("Incorrect login...");
+                    alertClock.restart();
+                }
             break;
             case packetID::WrongVersion:
                 cout << "You have an outdated version of the game. Please download the latest version." << endl;
+                userAlert.setString("You have an outdated version of the game. Please download the latest version.");
+                centralize(userAlert);
+                alertClock.restart();
             break;
         }
         mainWindow.clear(sf::Color(0, 150, 255));
@@ -66,11 +96,19 @@ void Login::run(STATE& state){
 }
 
 void Login::draw(){
+    int cl = 0;
+    cl = 255 - static_cast<int>(alertClock.getElapsedTime().asSeconds()*96);
+    if(cl < 0) cl = 0;
+    if(cl > 255) cl = 0;
+    userAlert.setColor(sf::Color(255, 0, 0, cl));
     mainWindow.draw(background);
 
-    mainWindow.draw(userInputBox.square);
-    mainWindow.draw(passwordInputBox.square);
-    mainWindow.draw(serverInputBox.square);
+    mainWindow.draw(loginBG);
+    mainWindow.draw(serverInputBox.background);
+    mainWindow.draw(userInputBox.background);
+    mainWindow.draw(passwordInputBox.background);
+
+
 
     mainWindow.draw(userInputBox.text);
     mainWindow.draw(passwordInputBox.text);
@@ -85,13 +123,35 @@ void Login::draw(){
 
     mainWindow.draw(loginButton.text);
     mainWindow.draw(registerButton.text);
+
+    mainWindow.draw(userAlert);
+
+}
+
+void Login::selectBox(){
+
+    userInputBox.deselect();
+    passwordInputBox.deselect();
+    serverInputBox.deselect();
+
+    switch(selectedBox){
+        case 0:
+            userInputBox.select();
+        break;
+        case 1:
+            passwordInputBox.select();
+        break;
+        case 2:
+            serverInputBox.select();
+        break;
+    }
 }
 
 void Login::handleEvent(const sf::Event& event, STATE& state){
     char letter;
     switch(event.type){
         case sf::Event::Closed:
-            network.sendDisconnect();
+            //network.sendDisconnect();
             mainWindow.close();
         break;
         case sf::Event::TextEntered:
@@ -109,12 +169,12 @@ void Login::handleEvent(const sf::Event& event, STATE& state){
                         if(letter != '\b'){
                             if(userBuffer.size() < 15){
                                 userBuffer.push_back(letter);
-                                userInputBox.inputText.setString(userBuffer);
+                                userInputBox.inputText.setString(userBuffer + "|");
                             }
                         }
                         else if(userBuffer.size() > 0){
                             userBuffer.pop_back();
-                            userInputBox.inputText.setString(userBuffer);
+                            userInputBox.inputText.setString(userBuffer + "|");
                         }
                     break;
                     case 1: //password
@@ -122,27 +182,27 @@ void Login::handleEvent(const sf::Event& event, STATE& state){
                             if(passwordBuffer.size() < 15){
                                passwordBuffer.push_back(letter);
                                 secretPass = secretPass + "*";
-                                passwordInputBox.inputText.setString(secretPass);
+                                passwordInputBox.inputText.setString(secretPass + "|");
                             }
                         }
 
                         else if(passwordBuffer.size() > 0){
                             passwordBuffer.pop_back();
                             secretPass.pop_back();
-                            passwordInputBox.inputText.setString(secretPass);
+                            passwordInputBox.inputText.setString(secretPass + "|");
                         }
                     break;
                     case 2: //server
                         if(letter != '\b'){
-                            if(serverBuffer.size() < 25){
+                            if(serverBuffer.size() < 64){
                                 serverBuffer.push_back(letter);
-                                serverInputBox.inputText.setString(serverBuffer);
+                                serverInputBox.inputText.setString(serverInputBox.getLastLetters(serverBuffer, 30) + "|");
                             }
 
                         }
                         else if(serverBuffer.size() > 0){
                             serverBuffer.pop_back();
-                            serverInputBox.inputText.setString(serverBuffer);
+                            serverInputBox.inputText.setString(serverInputBox.getLastLetters(serverBuffer, 30) + "|");
                         }
                     break;
                 }
@@ -151,6 +211,7 @@ void Login::handleEvent(const sf::Event& event, STATE& state){
         case sf::Event::MouseButtonPressed:
             int x = event.mouseButton.x;
             int y = event.mouseButton.y;
+
             if(userInputBox.clicked(x, y)){
                 selectedBox = 0;
             }
@@ -167,25 +228,46 @@ void Login::handleEvent(const sf::Event& event, STATE& state){
                 state = STATE::Register;
             }
         break;
-
     }
+    selectBox();
 }
-
 
 void Login::tryToConnect(){
     if(userBuffer.size() > 0){
         if(passwordBuffer.size() > 0){
-           network.connect(serverBuffer, port);
+            cout << "Please wait..." << endl;
+            userAlert.setString("Please wait...");
+            centralize(userAlert);
+            alertClock.restart();
+
             //    network.verifyVersion(VERSION);
             bool response = false, Color = false;
             string answer;
+            if(network.connect(serverBuffer, port))
+                network.sendLogin(userBuffer, md5(passwordBuffer), VERSION);
 
-            network.sendLogin(userBuffer, passwordBuffer, VERSION);
-            cout << "Please wait..." << endl;
+            else{
+                userAlert.setString("Could not connect to server");
+                centralize(userAlert);
+                alertClock.restart();
+            }
+
+
         }
-        else
+        else{
+            userAlert.setString("Input your password!");
+            centralize(userAlert);
+            alertClock.restart();
             cout << "Input your password!" << endl;
+        }
+
     }
-    else
+    else{
+        userAlert.setString("Input a username!");
+        centralize(userAlert);
+        alertClock.restart();
         cout << "Input a username!" << endl;
+    }
 }
+
+

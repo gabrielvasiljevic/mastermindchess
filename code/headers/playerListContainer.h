@@ -8,6 +8,7 @@ class playerListContainer : public Interface_Element{
         std::vector<playerPanel*> playerList;
         std::vector<userInfo> playersInfo;
         int pos_x, pos_y;
+        int totalOnline;
 
         Button scrollDownButton;
         Button scrollUpButton;

@@ -1,2 +1,3 @@
-127.0.0.1;
-14193 port;
+Server server.mastermind.pairg.dimap.ufrn.br
+Port 14193
+Console 0
