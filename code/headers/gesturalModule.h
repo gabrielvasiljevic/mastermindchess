@@ -23,6 +23,7 @@ class GesturalModule{
         int x, y;
         static GesturalModule& getGesturalModule();
         sf::Clock clickClock;
+        sf::Clock clickDelayClock;
         UdpSocket               application;
         TcpListener             listener;
         Packet                  packet;

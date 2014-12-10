@@ -117,12 +117,12 @@ void CheckMate::updateBoard(Piece pieces[8][10], TYPE t, int i, int j){
                         if(pieces[i-1][j+1].color != pieces[i][j].color){ //if the diagonal squares are from a different color
                             pieces[i][j].attackBoard[i-1][j+1] = 1;
                         }
-                        if(j - 1 >= 0){ //same here
+                    }
+                    if(j - 1 >= 0){ //same here
                             if(pieces[i-1][j-1].color != pieces[i][j].color){
                                 pieces[i][j].attackBoard[i-1][j-1] = 1;
                             }
                         }
-                    }
                 }
             }
 

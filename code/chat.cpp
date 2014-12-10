@@ -8,6 +8,7 @@ Chat::Chat(int x, int y, int size_x, int size_y, int input_x, int input_y, ChatS
     height = 2;
     cursorPosition = 0;
     this->style = style;
+    inputBuffer = "";
     if(style == ChatStyle::SpectateChat){
         spectate = true;
         historyLength = 6;

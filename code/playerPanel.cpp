@@ -5,9 +5,9 @@
 using namespace std;
 
 playerPanel::playerPanel(): viewProfile(100 + 15, 100 + 15, 15, 15, "", "profile", ButtonStyle::NoText),
-                                        add(100 + 75, 100 + 75, 15, 15, "", "add", ButtonStyle::NoText),
-                                        invite(100 + 45, 100 + 45, 15, 15, "", "sword", ButtonStyle::NoText),
-                                        watch(100 + 45, 100 + 45, 15, 15, "", "eye", ButtonStyle::NoText){
+                            add(100 + 75, 100 + 75, 15, 15, "", "add", ButtonStyle::NoText),
+                            invite(100 + 45, 100 + 45, 15, 15, "", "sword", ButtonStyle::NoText),
+                            watch(100 + 45, 100 + 45, 15, 15, "", "eye", ButtonStyle::NoText){
 
     sf::RectangleShape shape(sf::Vector2f(SIZE_X, SIZE_Y));
     shape.setPosition(100, 100);

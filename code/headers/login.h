@@ -38,6 +38,7 @@ class Login{
         std::string configBuffer;
 
         void selectBox();
+        void loadTexts();
         void handleEvent(const sf::Event& event, STATE& state);
         void draw();
         void tryToConnect();

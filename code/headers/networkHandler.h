@@ -19,7 +19,7 @@ class NetworkHandler{
     private:
         //Singleton
         static NetworkHandler* instance;
-        NetworkHandler(){connected = 0;};
+        NetworkHandler();
         NetworkHandler(NetworkHandler const&);
         void operator=(NetworkHandler const&);
 

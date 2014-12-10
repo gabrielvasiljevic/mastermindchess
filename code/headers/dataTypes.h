@@ -32,7 +32,7 @@ enum class STATE {Login, Lobby, Register, Game, GameOver, Waiting, CapaGame, Ran
 enum class packetID {None, Name, Move, Connect, Login, LoginResponse, GameEnd, Disconnect, Register, RegisterResponse, Chat, GameRequest,
                     Response, Options, Elo, MatchLog, Check, Checkmate, KeepAlive, MoveLog, WrongVersion, PlayerList, GameEndTimeOut, GiveUp,
                     MatchList, WatchRequest, WatchState, ExitQueue, BoardStatus, GameInvite, InviteResponse, FischerPieceOrder, SpectatorChat,
-                    MatchHistory, numberWatching, InviteRejection,
+                    MatchHistory, numberWatching, InviteRejection, AlreadyConnected,
                     GesturalMovement = 255};
 
 enum class ButtonStyle {TextAndImage, NoText, NoImage, Null};

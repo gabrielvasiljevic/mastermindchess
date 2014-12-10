@@ -3,6 +3,13 @@
 
 using namespace std;
 
+NetworkHandler::NetworkHandler(){
+    connected = 0;
+    myCurrentELO = 0;
+    myName = "";
+    myID = -1;
+};
+
 NetworkHandler& NetworkHandler::getNetwork(){
     static NetworkHandler instance;
     return instance;

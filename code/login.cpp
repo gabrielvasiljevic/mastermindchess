@@ -25,19 +25,19 @@ Login::Login(sf::RenderWindow& window):
                                         serverInputBox(375, 440, 200, 34, "Server", 454, 410, 2),
                                         registerButton(370, 480, 100, 70, "", "registerButton", ButtonStyle::NoText),
                                         loginButton(480, 480, 100, 45, "", "loginButton", ButtonStyle::NoText){
-    /*ifstream config {"config.dat"};
-    if (config.is_open()){
-        getline(config, serverBuffer, ';');
-        config >> port;
-        config >> console;
-    }*/
+
     serverBuffer = configurationDAO.getServer();
     port = configurationDAO.getPort();
     console = configurationDAO.getConsole();
+    userBuffer = configurationDAO.getUser();
+
+
     if(!console){
         FreeConsole();
     }
     serverInputBox.inputText.setString(serverInputBox.getLastLetters(serverBuffer, 30));
+    userInputBox.inputText.setString(userInputBox.getLastLetters(userBuffer, 30));
+    passwordInputBox.inputText.setString("");
 
 
     this->font.loadFromFile("media/fonts/AGENCYB.TTF");
@@ -55,6 +55,7 @@ Login::Login(sf::RenderWindow& window):
     this->loginBG.setTexture(*Textures::loginBG);
     this->loginBG.setPosition(350, 260);
     this->secretPass = "";
+    this->passwordBuffer = "";
 }
 
 void Login::run(STATE& state){
@@ -70,6 +71,7 @@ void Login::run(STATE& state){
                 if(network.receiveLoginResponse()){
                     cout << "Login successful!" << endl;
                     configurationDAO.setServer(serverBuffer);
+                    configurationDAO.setUser(userBuffer);
                     state = STATE::Lobby;
                 }
                 else{
@@ -243,8 +245,9 @@ void Login::tryToConnect(){
             //    network.verifyVersion(VERSION);
             bool response = false, Color = false;
             string answer;
-            if(network.connect(serverBuffer, port))
+            if(network.connect(serverBuffer, port)){
                 network.sendLogin(userBuffer, md5(passwordBuffer), VERSION);
+            }
 
             else{
                 userAlert.setString("Could not connect to server");

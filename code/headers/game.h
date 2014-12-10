@@ -89,6 +89,7 @@ class Game{
 
         sf::RenderWindow &mainWindow;
         bool            ranked;
+        bool            pieceClick;
         int             i, j, iPiece, jPiece;
         int             rows, columns;
         int             userX, userY;

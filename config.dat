@@ -1,3 +1,4 @@
-Server server.mastermind.pairg.dimap.ufrn.br
+Server 127.0.0.1
 Port 14193
-Console 0
+Console 1
+Username teste

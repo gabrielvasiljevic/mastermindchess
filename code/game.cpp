@@ -17,8 +17,6 @@ using namespace std;
                 chancelers, bchancelers,
                 blanks;
 
-    bool pieceClick = false;
-
 
 
 Game::Game(sf::RenderWindow &window, int color, int gametype) :
@@ -114,6 +112,7 @@ Game::Game(sf::RenderWindow &window, int color, int gametype) :
     this->enemyCheck = false;
     this->checkMate = false;
     this->ranked = true;
+    this->pieceClick = false;
 
     this->warnings.setFont(font);
     this->warnings.setCharacterSize(30U);
@@ -130,6 +129,7 @@ Game::Game(sf::RenderWindow &window, int color, int gametype) :
     this->myName.setCharacterSize(40U);
     this->myName.setColor(sf::Color::Black);
     this->myName.setPosition(350, botPlayer.getPosition().y + 5);
+    this->myName.setString("My name");
 
 
     this->displayELO.setFont(font);
@@ -176,6 +176,7 @@ Game::Game(sf::RenderWindow &window, int color, int gametype) :
         }
     }
     testCheck.columns = columns;
+
 }
 
 void Game::reset(int gameColor, int gameTime, int gameType, bool ranked){
@@ -185,6 +186,7 @@ void Game::reset(int gameColor, int gameTime, int gameType, bool ranked){
     this->gameTime          = gameTime;
     this->moveCount         = 0;
     this->enemyelo          = 0;
+    this->pieceClick        = false;
     this->check             = false;
     this->enemyCheck        = false;
     this->checkMate         = false;
@@ -410,6 +412,13 @@ int Game::Run(STATE& state){
             case packetID::numberWatching:
                 watching.setString(to_string(network.receiveNumberWatching()));
             break;
+
+            case packetID::FischerPieceOrder:{
+                string newBoard[8][10];
+                network.receiveFischerPiecesOrder(newBoard);
+                b.setBoard(newBoard);
+            break;
+            }
 
             case packetID::Checkmate:
                 logCheck();

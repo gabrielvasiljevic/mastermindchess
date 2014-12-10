@@ -16,8 +16,10 @@ class ConfigurationDAO{
         int getPort();
         int getConsole();
         std::string getServer();
+        std::string getUser();
 
         void setServer(std::string _server);
+         void setUser(std::string _user);
 
 
     private:
@@ -28,6 +30,7 @@ class ConfigurationDAO{
         int port;
         int console;
         std::string server;
+        std::string user;
         std::map<std::string, std::string> options;
 
         void loadConfiguration();

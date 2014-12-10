@@ -22,6 +22,9 @@ Invite::Invite(sf::RenderWindow& window) : mainWindow(window),
 
     okButton.text.setFont(font);
     okButton.text.setCharacterSize(45U);
+    invited = false;
+    inviting = false;
+    name = "";
 }
 
 

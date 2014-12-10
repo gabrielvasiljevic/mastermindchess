@@ -11,6 +11,7 @@ void ConfigurationDAO::loadConfiguration(){
     parse(config);
     port = Utility::StringToNumber(options["Port"]);
     server = options["Server"];
+    user = options["Username"];
     console = Utility::StringToNumber(options["Console"]);
 }
 
@@ -37,10 +38,25 @@ int ConfigurationDAO::getPort(){
     return port;
 }
 
+std::string ConfigurationDAO::getUser(){
+    return user;
+}
+
 void ConfigurationDAO::setServer(std::string _server){
     ofstream output{"config.dat"};
+    server = _server;
     output  << "Server "    << _server << "\n"
             << "Port "      << port    << "\n"
-            << "Console "   << console;
+            << "Console "   << console << "\n"
+            << "Username "  << user;
+}
+
+void ConfigurationDAO::setUser(std::string _user){
+    ofstream output{"config.dat"};
+    user = _user;
+    output  << "Server "    << server << "\n"
+            << "Port "      << port    << "\n"
+            << "Console "   << console << "\n"
+            << "Username "  << _user;
 }
 
